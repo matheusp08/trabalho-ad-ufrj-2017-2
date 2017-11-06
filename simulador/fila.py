@@ -1,7 +1,4 @@
-"""A fila recebe os 4 parametros descritos abaixo:
-    - Ordem de atendimento: 'FCFS', 'LCFS'
-    - Prioridade: 1, 2,..., N
-    - Taxa de entrada
+""" Modulo Fila
 """
 
 class Fila:
@@ -20,7 +17,6 @@ class Fila:
         self.tipo = tipo
         self.prioridade = prioridade
         self.taxa_entrada = taxa_entrada
-        self.imprime_parametros()
 
     def imprime_parametros(self):
         """Funcao para imprimir os parametros da fila
@@ -29,6 +25,7 @@ class Fila:
             Returns:
                 Nenhum retorno
         """
+        print("Fila %d" % self.prioridade)
         print("Tipo da fila: %s" % self.tipo)
         print("Prioridade: %d" % self.prioridade)
         print("Taxa de entrada: %f" % self.taxa_entrada)

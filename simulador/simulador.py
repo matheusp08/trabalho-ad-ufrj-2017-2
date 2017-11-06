@@ -1,27 +1,29 @@
-"""Classe principal do Simulador"""
+"""Modulo Simulador
+"""
 
-import fila as f
+import fila
+import fregues
+import utils
 
 class Simulador:
     """Classe do simulador
-    Args:
-        taxa_entrada: taxa de entrada do sistema.
-        n_rodadas: numero de rodadas da simulacao.
-    Returns:
-        nada
+    Attributes:
+        taxa: taxa de entrada das filas
+        t_student: distribuicao para intervalo de confianca de 95%
     """
-    def executar(self, taxa_entrada, n_rodadas):
+    def __init__(self):
+        self.taxa = utils.Utils.gera_taxa_exponencial()
+        self.t_student = utils.Utils.get_distribuicao_t_student()
+
+    def executar(self, n_rodadas):
         """Funcao de execucao do simulador
         Args:
-            taxa_entrada: taxa de entrada do sistema.
             n_rodadas: numero de rodadas da simulacao.
-        Returns:
-            nada
         """
         print("Numero de rodadas: %d" % n_rodadas)
-        f.Fila("FCFS", 1, taxa_entrada)
-        f.Fila("FCFS", 2, taxa_entrada)
+        print("T-student 95 por cento intervalo de confianca: %f" % self.t_student)
+        fila.Fila("FCFS", 1, self.taxa).imprime_parametros()
+        fila.Fila("FCFS", 2, self.taxa).imprime_parametros()
+        fregues.Fregues().imprime_parametros()
 
-
-# INICIO DO PROGRAMA
-Simulador().executar(1.2, 100)
+Simulador().executar(100)
