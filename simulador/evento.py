@@ -16,9 +16,9 @@ from enum import Enum
 class TipoEvento(Enum):
     """ Enum que define os tipos de eventos existentes
     """
-    CHEGADA = 1
-    FIM_SERVICO_1 = 2
-    FIM_SERVICO_2 = 3
+    CHEGADA = "CHEGADA"
+    FIM_SERVICO_1 = "FIM_SERVICO_1"
+    FIM_SERVICO_2 = "FIM_SERVICO_2"
 
 class Evento:
     """ Classe principal dos eventos do sistema
