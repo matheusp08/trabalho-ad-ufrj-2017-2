@@ -8,7 +8,7 @@ class Fregues:
     """
 
     def __init__(self):
-        self.taxa_servico = u.Utils.get_taxa_servico()
+        self.taxa_servico = u.Utils.gera_taxa_exp(0.2)
 
     def imprime_parametros(self):
         """Funcao para imprimir os parametros do fregues
