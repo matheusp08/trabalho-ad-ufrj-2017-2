@@ -1,23 +1,26 @@
 """ Modulo Utils
 """
 
-import random
 import math
+import numpy.random as nprand
 
 class Utils:
     """ Classe que contem metodos utilitarios
     """
-    @staticmethod
-    def get_taxa_servico():
-        """ retorna a taxa de servico
-        """
-        return -1*math.log(1 - random.uniform(0, 1))
+
+    nprand.seed(42)
 
     @staticmethod
-    def gera_taxa_exponencial():
-        """ metodo para gerar um numero aleatorio de uma distribuicao exponencial
+    def gera_taxa_exp_seed(taxa):
+        """ retorna a taxa exponencial dado uma semente
         """
-        return -1*math.log(1 - random.uniform(0, 1))
+        return -1*math.log(1 - nprand.rand(1)[0]) / taxa
+
+    @staticmethod
+    def gera_taxa_exp(taxa):
+        """ retorna a taxa exponencial
+        """
+        return nprand.exponential(taxa)
 
     @staticmethod
     def get_distribuicao_t_student():
