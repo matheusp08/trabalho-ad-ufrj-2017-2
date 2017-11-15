@@ -17,8 +17,7 @@ class TipoEvento(Enum):
     """ Enum que define os tipos de eventos existentes
     """
     CHEGADA = "CHEGADA"
-    FIM_SERVICO_1 = "FIM_SERVICO_1"
-    FIM_SERVICO_2 = "FIM_SERVICO_2"
+    FIM_SERVICO = "FIM_SERVICO"
 
 class Evento:
     """ Classe principal dos eventos do sistema
@@ -28,3 +27,5 @@ class Evento:
         self.fregues_id = fregues_id
         self.tipo = tipo
         self.prioridade = prioridade
+
+        # print("Evento de %s ocorreu no tempo %f pelo fregues %d de prioridade %d" % (self.tipo.name, self.tempo, self.fregues_id, self.prioridade))

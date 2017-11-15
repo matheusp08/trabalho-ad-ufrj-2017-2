@@ -14,7 +14,7 @@ class Simulador:
         t_student: distribuicao para intervalo de confianca de 95%
     """
     def __init__(self):
-        self.taxa = Utils.gera_taxa_exp(0.2)
+        # self.taxa = Utils.gera_taxa_exp(0.2)
         self.t_student = Utils.get_distribuicao_t_student()
 
     def executar(self, n_fregueses, n_rodadas, rho):
@@ -35,7 +35,7 @@ class Simulador:
         fim = datetime.now()
         total = fim - inicio
 
-        print("Tempo de execucao: %f" % total)
+        print("Tempo de execucao: " + str(total))
 
     def executar_rodada(self, n_fregueses, lambd, taxa_servico):
         """ Metodo responsavel pela execucao de cada rodada
@@ -43,17 +43,67 @@ class Simulador:
         fila1 = Fila(1)
         fila2 = Fila(2)
         eventos = []
-        tempo_atual = 0
+        tempo = 0
         fregueses_servidos = 0
         id_proximo_fregues = 0
+        fregues_executando = Fregues()
 
         while fregueses_servidos < n_fregueses:
-            chegada = Utils.gera_taxa_exp_seed(lambd)
-            tempo_atual += chegada
+            tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
+            tempo += tempo_ate_prox_chegada
+
+            while tempo_ate_prox_chegada > 0 and fregues_executando.fregues_id != -1:
+                if fregues_executando.tempo_restante < tempo_ate_prox_chegada:
+                    tempo_ate_prox_chegada -= fregues_executando.tempo_restante
+                    fregues_executando.tempo_restante = 0
+                    tempo_atual = tempo - tempo_ate_prox_chegada
+                    eventos.append(
+                        Evento(tempo_atual,
+                            fregues_executando.fregues_id,
+                            TipoEvento.FIM_SERVICO,
+                            fregues_executando.prioridade))
+                    
+                    if fregues_executando.prioridade == 1:
+                        w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
+                        fila1.atualiza_tempo_w(w1)
+                        fila1.remove()
+                        fregues_executando.troca_fila(tempo_atual)
+                        fila2.adiciona(fregues_executando)
+                        fila2.soma_servico_x(fregues_executando.tempo_servico2)
+                        eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
+                    else:
+                        w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
+                        fila2.atualiza_tempo_w(w2)
+                        fila2.remove()
+                        fregueses_servidos += 1
+                    
+                    if fila1.tamanho() > 0:
+                        fregues_executando = fila1.proximo_fregues()
+                    else:
+                        if fila2.tamanho() > 0:
+                            fregues_executando = fila2.proximo_fregues()
+                        else:
+                            fregues_executando = Fregues()
+                else:
+                    fregues_executando.tempo_restante -= tempo_ate_prox_chegada
+                    tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues < n_fregueses:
-                fregues = Fregues(id_proximo_fregues, tempo_atual, lambd)
+                fregues = Fregues(id_proximo_fregues, tempo, taxa_servico)
                 fila1.adiciona(fregues)
-                eventos.append(Evento(tempo_atual, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+                fila1.soma_servico_x(fregues.tempo_servico1)
+                eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+                if fregues_executando.fregues_id == -1:
+                    fregues_executando = fregues
+                else:
+                    if fregues_executando.prioridade == 2:
+                        fregues_executando = fregues
+                        fila2.atualiza_ns(1)
+                    else:
+                        fila1.atualiza_ns(1)
+                id_proximo_fregues += 1
+            
+        fila1.imprime_esperancas()
+        fila2.imprime_esperancas()
 
-Simulador().executar(1000, 1, 0.4)
+Simulador().executar(10000, 1, 0.4)
