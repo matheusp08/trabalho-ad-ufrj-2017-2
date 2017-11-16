@@ -14,7 +14,6 @@ class Simulador:
         t_student: distribuicao para intervalo de confianca de 95%
     """
     def __init__(self):
-        # self.taxa = Utils.gera_taxa_exp(0.2)
         self.t_student = Utils.get_distribuicao_t_student()
 
     def executar(self, n_fregueses, n_rodadas, rho):
@@ -90,19 +89,28 @@ class Simulador:
 
             if id_proximo_fregues < n_fregueses:
                 fregues = Fregues(id_proximo_fregues, tempo, taxa_servico)
-                fila1.adiciona(fregues)
                 fila1.soma_servico_x(fregues.tempo_servico1)
+                fila2.soma_servico_x(fregues.tempo_servico2)
+
+                fila1.atualiza_nq(fila1.tamanho())
+                fila2.atualiza_nq(fila2.tamanho())
+
+                fila1.adiciona(fregues)
                 eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
                 if fregues_executando.fregues_id == -1:
                     fregues_executando = fregues
                 else:
                     if fregues_executando.prioridade == 2:
                         fregues_executando = fregues
+                        fila2.atualiza_nq(fila2.tamanho() - 1)
                         fila2.atualiza_ns(1)
                     else:
+                        fila1.atualiza_nq(fila1.tamanho() - 1)
                         fila1.atualiza_ns(1)
                 id_proximo_fregues += 1
-            
+
+        fila1.atualiza_esperancas(n_fregueses)
+        fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
