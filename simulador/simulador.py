@@ -68,7 +68,6 @@ class Simulador:
                         fila1.remove()
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
-                        fila2.soma_servico_x(fregues_executando.tempo_servico2)
                         eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
@@ -102,10 +101,10 @@ class Simulador:
                 else:
                     if fregues_executando.prioridade == 2:
                         fregues_executando = fregues
-                        fila2.atualiza_nq(fila2.tamanho() - 1)
+                        fila2.atualiza_nq(-1)
                         fila2.atualiza_ns(1)
                     else:
-                        fila1.atualiza_nq(fila1.tamanho() - 1)
+                        fila1.atualiza_nq(-1)
                         fila1.atualiza_ns(1)
                 id_proximo_fregues += 1
 
@@ -114,4 +113,4 @@ class Simulador:
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(10000, 1, 0.4)
+Simulador().executar(50000, 1, 0.2)
