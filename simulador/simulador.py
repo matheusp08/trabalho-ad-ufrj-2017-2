@@ -2,10 +2,13 @@
 """
 
 from datetime import datetime
+from matplotlib import pyplot as plt
 from fila import Fila
 from fregues import Fregues
 from utils import Utils
 from evento import Evento, TipoEvento
+
+utilizacao = []
 
 class Simulador:
     """Classe do simulador
@@ -37,6 +40,7 @@ class Simulador:
         print("Tempo de execucao: " + str(total))
 
     def executar_rodada(self, n_fregueses, lambd, taxa_servico):
+        global utilizacao
         """ Metodo responsavel pela execucao de cada rodada
         """
         fila1 = Fila(1)
@@ -46,6 +50,7 @@ class Simulador:
         fregueses_servidos = 0
         id_proximo_fregues = 0
         fregues_executando = Fregues()
+        
 
         while fregueses_servidos < n_fregueses:
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
@@ -107,10 +112,17 @@ class Simulador:
                         fila1.atualiza_nq(-1)
                         fila1.atualiza_ns(1)
                 id_proximo_fregues += 1
+                
+            if fregueses_servidos > 0 and fregueses_servidos % 10 == 0:
+                utilizacao.append((fila1.ns_med + fila2.ns_med)/fregueses_servidos)
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(50000, 1, 0.2)
+Simulador().executar(5000, 1, 0.4)
+plt.plot(utilizacao)
+plt.ylabel('utilizacao do sistema')
+plt.xlabel('num_fregueses/10')
+plt.show()
