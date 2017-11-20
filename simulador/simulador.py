@@ -1,4 +1,6 @@
 """Modulo Simulador
+
+
 """
 
 from datetime import datetime
@@ -7,6 +9,7 @@ from fila import Fila
 from fregues import Fregues
 from utils import Utils
 from evento import Evento, TipoEvento
+from plot import Plot
 
 utilizacao = []
 
@@ -40,9 +43,9 @@ class Simulador:
         print("Tempo de execucao: " + str(total))
 
     def executar_rodada(self, n_fregueses, lambd, taxa_servico):
-        global utilizacao
         """ Metodo responsavel pela execucao de cada rodada
         """
+        global utilizacao
         fila1 = Fila(1)
         fila2 = Fila(2)
         eventos = []
@@ -113,16 +116,13 @@ class Simulador:
                         fila1.atualiza_ns(1)
                 id_proximo_fregues += 1
                 
-            if fregueses_servidos > 0 and fregueses_servidos % 10 == 0:
-                utilizacao.append((fila1.ns_med + fila2.ns_med)/fregueses_servidos)
+            if id_proximo_fregues % 10 == 0:
+                utilizacao.append((fila1.ns_med + fila2.ns_med)/id_proximo_fregues)
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(5000, 1, 0.4)
-plt.plot(utilizacao)
-plt.ylabel('utilizacao do sistema')
-plt.xlabel('num_fregueses/10')
-plt.show()
+Simulador().executar(10000, 1, 0.4)
+Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor')
