@@ -1,6 +1,5 @@
 """Modulo Simulador
 """
-
 from datetime import datetime
 from fila import Fila
 from fregues import Fregues
@@ -25,29 +24,27 @@ class Simulador:
         """
         lambd = rho/2
         taxa_servico = 1
-        resultados = []
 
         inicio = datetime.now()
-        for i in range(n_rodadas):
-            resultado = self.executar_rodada(n_fregueses, lambd, taxa_servico)
-            resultados.append(resultado)
+        self.executar_rodadas(n_rodadas, n_fregueses, lambd, taxa_servico)
         fim = datetime.now()
         total = fim - inicio
 
         print("Tempo de execucao: " + str(total))
 
-    def executar_rodada(self, n_fregueses, lambd, taxa_servico):
+    def executar_rodadas(self, n_rodadas, n_fregueses, lambd, taxa_servico):
         """ Metodo responsavel pela execucao de cada rodada
         """
         fila1 = Fila(1)
-        fila2 = Fila(2)
-        eventos = []
+        fila2 = Fila(2) 
         tempo = 0
-        fregueses_servidos = 0
         id_proximo_fregues = 0
+        fregueses_servidos = 0
+        rodada_atual = 1
+        eventos = []
         fregues_executando = Fregues()
-
-        while fregueses_servidos < n_fregueses:
+        variancia_ns = []
+        while rodada_atual <= n_rodadas:
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
             tempo += tempo_ate_prox_chegada
 
@@ -74,6 +71,8 @@ class Simulador:
                         fila2.atualiza_tempo_w(w2)
                         fila2.remove()
                         fregueses_servidos += 1
+                        if fregueses_servidos % n_fregueses == 0:
+                            rodada_atual += 1
                     
                     if fila1.tamanho() > 0:
                         fregues_executando = fila1.proximo_fregues()
@@ -86,31 +85,33 @@ class Simulador:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
-            if id_proximo_fregues < n_fregueses:
-                fregues = Fregues(id_proximo_fregues, tempo, taxa_servico)
-                fila1.soma_servico_x(fregues.tempo_servico1)
-                fila2.soma_servico_x(fregues.tempo_servico2)
+            fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
+            fila1.soma_servico_x(fregues.tempo_servico1)
+            fila2.soma_servico_x(fregues.tempo_servico2)
 
-                fila1.atualiza_nq(fila1.tamanho())
-                fila2.atualiza_nq(fila2.tamanho())
+            fila1.atualiza_nq(fila1.tamanho())
+            fila2.atualiza_nq(fila2.tamanho())
 
-                fila1.adiciona(fregues)
-                eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
-                if fregues_executando.fregues_id == -1:
+            fila1.adiciona(fregues)
+            eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+            if fregues_executando.fregues_id == -1:
+                fregues_executando = fregues
+            else:
+                if fregues_executando.prioridade == 2:
                     fregues_executando = fregues
+                    fila2.atualiza_nq(-1)
+                    fila2.atualiza_ns(1)
                 else:
-                    if fregues_executando.prioridade == 2:
-                        fregues_executando = fregues
-                        fila2.atualiza_nq(-1)
-                        fila2.atualiza_ns(1)
-                    else:
-                        fila1.atualiza_nq(-1)
-                        fila1.atualiza_ns(1)
-                id_proximo_fregues += 1
+                    fila1.atualiza_nq(-1)
+                    fila1.atualiza_ns(1)
+            id_proximo_fregues += 1
+
+            if id_proximo_fregues % 10 == 0:
+                variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
-
-Simulador().executar(50000, 1, 0.2)
+       
+Simulador().executar(1000, 1, 0.2)

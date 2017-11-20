@@ -81,6 +81,11 @@ class Fila:
         """
         return self.fregueses[0]
 
+    def calcula_variancia_ns(self, valor, n):
+        """ Metodo para calcular a variancia de Ns
+        """
+        return ((valor - (self.ns_med/n))**2)/(n-1)
+
     def atualiza_esperancas(self, n):
         """ Metodo para calcular de fato as esperancas
         """
