@@ -1,10 +1,15 @@
 """Modulo Simulador
 """
 from datetime import datetime
+from matplotlib import pyplot as plt
 from fila import Fila
 from fregues import Fregues
 from utils import Utils
 from evento import Evento, TipoEvento
+from plot import Plot
+
+utilizacao = []
+variancia_ns = []
 
 class Simulador:
     """Classe do simulador
@@ -35,6 +40,8 @@ class Simulador:
     def executar_rodadas(self, n_rodadas, n_fregueses, lambd, taxa_servico):
         """ Metodo responsavel pela execucao de cada rodada
         """
+        global utilizacao
+        global variancia_ns
         fila1 = Fila(1)
         fila2 = Fila(2) 
         tempo = 0
@@ -43,7 +50,6 @@ class Simulador:
         rodada_atual = 1
         eventos = []
         fregues_executando = Fregues()
-        variancia_ns = []
         while rodada_atual <= n_rodadas:
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
             tempo += tempo_ate_prox_chegada
@@ -102,16 +108,24 @@ class Simulador:
                     fila2.atualiza_nq(-1)
                     fila2.atualiza_ns(1)
                 else:
-                    fila1.atualiza_nq(-1)
-                    fila1.atualiza_ns(1)
+                    if fregues_executando.prioridade == 2:
+                        fregues_executando = fregues
+                        fila2.atualiza_nq(-1)
+                        fila2.atualiza_ns(1)
+                    else:
+                        fila1.atualiza_nq(-1)
+                        fila1.atualiza_ns(1)
             id_proximo_fregues += 1
-
+                
             if id_proximo_fregues % 10 == 0:
                 variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
+                utilizacao.append((fila1.ns_med + fila2.ns_med)/id_proximo_fregues)
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
-       
-Simulador().executar(1000, 1, 0.2)
+
+Simulador().executar(10000, 1, 0.4)
+Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor')
+Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns')

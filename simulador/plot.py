@@ -9,7 +9,7 @@ class Plot:
     def __init__(self):
         pass
 
-    def desenha_grafico(self, dados, xLabel, yLabel):
+    def desenha_grafico(self, dados, x_label, y_label):
         """ Funcao para desenhar os graficos
             Args:
                 dados: vetor com os valores a serem plotados
@@ -20,6 +20,6 @@ class Plot:
         fator = 100
         plt.plot(dados)
         plt.xticks(np.arange(0, tamanho + 1, fator))
-        plt.ylabel(yLabel)
-        plt.xlabel(xLabel)
+        plt.ylabel(y_label)
+        plt.xlabel(x_label)
         plt.show()
