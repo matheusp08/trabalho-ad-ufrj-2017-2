@@ -1,4 +1,4 @@
-"""Modulo Simulador
+""" Modulo Simulador
 """
 from datetime import datetime
 from matplotlib import pyplot as plt
