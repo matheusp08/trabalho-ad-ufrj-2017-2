@@ -51,18 +51,26 @@ class Simulador:
         eventos = []
         fregues_executando = Fregues()
         nao_tem_mais_ngm_p_chegar = 0
+        executando = ""
         
         
         while fregueses_servidos < n_fregueses:
             tempo_ate_prox_chegada = lambd
             tempo += tempo_ate_prox_chegada
-            print("Tempo de execução: ", tempo)
+            print("\nTEMPO DE EXECUÇÃO: ", tempo)
             
             while (tempo_ate_prox_chegada > 0 and fregues_executando.fregues_id != -1) or nao_tem_mais_ngm_p_chegar:
                 # print("While 2. Tempo: ", tempo, ". Tempo restante: ", fregues_executando.tempo_restante, ". PRox chegada: ", tempo_ate_prox_chegada);
-                print("ID:", fregues_executando.fregues_id, "Tempo restante: ", fregues_executando.tempo_restante)
+                if fregues_executando.tempo_restante > 0:
+                    executando = " - EXECUTANDO"
+                else:
+                    executando = ""
+                print("[Tempo Restante]", fregues_executando.tempo_restante, "s, Fregues: ", fregues_executando.fregues_id, executando)
                 if (fregues_executando.tempo_restante < tempo_ate_prox_chegada) or nao_tem_mais_ngm_p_chegar:
                     tempo_ate_prox_chegada -= fregues_executando.tempo_restante
+                    if nao_tem_mais_ngm_p_chegar:
+                        tempo = tempo + fregues_executando.tempo_restante
+                        print("\nTEMPO DE EXECUÇÃO: ", tempo)
                     fregues_executando.tempo_restante = 0
                     tempo_atual = tempo - tempo_ate_prox_chegada
                     eventos.append(
@@ -72,7 +80,7 @@ class Simulador:
                             fregues_executando.prioridade))
                     
                     if fregues_executando.prioridade == 1:
-                        print("[Mudando de Fila] Fregues", fregues_executando.fregues_id, "\n")
+                        print("[Mudando de Fila] Fregues", fregues_executando.fregues_id)
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
                         fila1.atualiza_tempo_w(w1)
                         fila1.remove()
@@ -86,7 +94,7 @@ class Simulador:
                         fila2.remove()
                         fregueses_servidos += 1
                         if fregueses_servidos == n_fregueses:
-                            print("ACABARAM TODOS OS FREGUESES!!!")
+                            print("ACABARAM TODOS OS FREGUESES!!!\n")
                         if fregueses_servidos % n_fregueses == 0:
                             rodada_atual += 1
                     
@@ -100,11 +108,14 @@ class Simulador:
                             nao_tem_mais_ngm_p_chegar = 0
 
                 else:
-                    fregues_executando.tempo_restante -= tempo_ate_prox_chegada
-                    tempo_ate_prox_chegada = 0
                     if id_proximo_fregues == n_fregueses:
                         #TENHO QUE ATUALIZAR O SISTEMA DIZENDO Q N TEM MAIS NGM PARA CHEGAR, QUE ESSE CARA QUE TEM Q RODAR.
                         nao_tem_mais_ngm_p_chegar = 1
+                        if nao_tem_mais_ngm_p_chegar:
+                            tempo = tempo + fregues_executando.tempo_restante
+                            print("\nTEMPO DE EXECUÇÃO: ", tempo)
+                    fregues_executando.tempo_restante -= tempo_ate_prox_chegada
+                    tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues < n_fregueses:
                 # Pq diabos esse comeco estava fora desse if? Acaba nao tratando o caso em que tempo_restante = tempo_ate_prox_chegada !!
@@ -140,6 +151,6 @@ class Simulador:
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(2, 1, 2)
+Simulador().executar(4, 1, 2)
 # Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor')
 # Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns')
