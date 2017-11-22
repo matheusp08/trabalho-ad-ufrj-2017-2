@@ -70,10 +70,9 @@ class Simulador:
                             fregues_executando.fregues_id,
                             TipoEvento.FIM_SERVICO,
                             fregues_executando.prioridade))
-                    print("(Acabou seu servico.)\n")
                     
                     if fregues_executando.prioridade == 1:
-                        print("Botando fregues", fregues_executando.fregues_id, "na fila 2")
+                        print("[Mudando de Fila] Fregues", fregues_executando.fregues_id, "\n")
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
                         fila1.atualiza_tempo_w(w1)
                         fila1.remove()
@@ -87,7 +86,7 @@ class Simulador:
                         fila2.remove()
                         fregueses_servidos += 1
                         if fregueses_servidos == n_fregueses:
-                            print("Acabaram os fregueses!!!")
+                            print("ACABARAM TODOS OS FREGUESES!!!")
                         if fregueses_servidos % n_fregueses == 0:
                             rodada_atual += 1
                     
