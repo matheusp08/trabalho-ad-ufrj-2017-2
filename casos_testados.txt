@@ -1,0 +1,9 @@
+n_fregueses = 3
+Serviço1 = 2
+Serviço2 = 1
+Taxas = 1
+
+n = 3
+Serviço1 = 1
+Serviço2 = 1
+Taxas = 1
