@@ -153,6 +153,6 @@ class Simulador:
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(3, 1, 2)
+Simulador().executar(3, 1, 6)
 # Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor')
 # Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns')

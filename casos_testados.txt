@@ -7,3 +7,15 @@ n = 3
 Serviço1 = 1
 Serviço2 = 1
 Taxas = 1
+
+n = 3
+Serviço1 = 1
+Serviço2 = 2
+Taxas = 1
+
+CONFIGURAÇÃO QUE PERCEBI O ERRO:
+n = 3
+Serviço1 = 1
+Serviço2 = 2
+Taxa de entrada = 3 (importante!)
+taxa de saida = 1
