@@ -58,13 +58,43 @@ class Simulador:
             tempo_ate_prox_chegada = lambd
             tempo += tempo_ate_prox_chegada
             print("\nTEMPO DE EXECUÇÃO: ", tempo)
+
+            if id_proximo_fregues < n_fregueses:
+                # Pq diabos esse comeco estava fora desse if? Acaba nao tratando o caso em que tempo_restante = tempo_ate_prox_chegada !!
+                print("[New Fregues] ID:", id_proximo_fregues)
+                fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
+                fila1.soma_servico_x(fregues.tempo_servico1)
+                fila2.soma_servico_x(fregues.tempo_servico2)
+
+                fila1.atualiza_nq(fila1.tamanho())
+                fila2.atualiza_nq(fila2.tamanho())
+                fila1.adiciona(fregues)
+                eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+
+            if fregues_executando.fregues_id == -1:
+                fregues_executando = fregues
+            else:
+                if fregues_executando.prioridade == 2:
+                    #if fregues.prioridade == 1:
+                    #   print("Fregues", fregues_executando.fregues_id, "(fila", fregues_executando.prioridade,") foi interrompido pelo fregues", fregues.fregues_id, "(fila", fregues.prioridade,")")
+                    if fregues_executando.tempo_restante != 0:
+                        fregues_executando = fregues
+                    fila2.atualiza_nq(-1)
+                    fila2.atualiza_ns(1)
+                else:
+                    fila1.atualiza_nq(-1)
+                    fila1.atualiza_ns(1)
+            if id_proximo_fregues < n_fregueses:        
+                id_proximo_fregues += 1
+            else:
+                nao_tem_mais_ngm_p_chegar = 1
             
             while (tempo_ate_prox_chegada > 0 and fregues_executando.fregues_id != -1) or nao_tem_mais_ngm_p_chegar:
                 # print("While 2. Tempo: ", tempo, ". Tempo restante: ", fregues_executando.tempo_restante, ". PRox chegada: ", tempo_ate_prox_chegada);
                 if fregues_executando.tempo_restante > 0:
                     executando = "   - EXECUTANDO"
                 else:
-                    executando = " - ACABOU NO TEMPO ANTERIOR"
+                    executando = " - ACABOU"
                 print("[Tempo Restante] Fregues:", fregues_executando.fregues_id, ", Tempo: ", fregues_executando.tempo_restante, executando)
                 
                 
@@ -72,8 +102,9 @@ class Simulador:
                     tempo_ate_prox_chegada -= fregues_executando.tempo_restante
                     if nao_tem_mais_ngm_p_chegar:
                         tempo = tempo + fregues_executando.tempo_restante
-                        print("\nTEMPO DE EXECUÇÃO: ", tempo)
+                        #print("\nTEMPO DE EXECUÇÃO: ", tempo)
                     fregues_executando.tempo_restante = 0
+                    ##Acho que posso printar o tempo aqui!!!
                     tempo_atual = tempo - tempo_ate_prox_chegada
                     eventos.append(
                         Evento(tempo_atual,
@@ -82,6 +113,7 @@ class Simulador:
                             fregues_executando.prioridade))
                     
                     if fregues_executando.prioridade == 1:
+                        #print("\nTEMPO DE EXECUÇÃO: ", tempo + 1)
                         print("[Mudando de Fila] Fregues", fregues_executando.fregues_id)
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
                         fila1.atualiza_tempo_w(w1)
@@ -115,34 +147,11 @@ class Simulador:
                         nao_tem_mais_ngm_p_chegar = 1
                         if nao_tem_mais_ngm_p_chegar:
                             tempo = tempo + tempo_ate_prox_chegada
-                            print("\nTEMPO DE EXECUÇÃO: ", tempo)
+                            #print("\nTEMPO DE EXECUÇÃO: ", tempo)
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
-            if id_proximo_fregues < n_fregueses:
-                # Pq diabos esse comeco estava fora desse if? Acaba nao tratando o caso em que tempo_restante = tempo_ate_prox_chegada !!
-                print("[New Fregues] ID:", id_proximo_fregues)
-                fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
-                fila1.soma_servico_x(fregues.tempo_servico1)
-                fila2.soma_servico_x(fregues.tempo_servico2)
-
-                fila1.atualiza_nq(fila1.tamanho())
-                fila2.atualiza_nq(fila2.tamanho())
-                fila1.adiciona(fregues)
-                eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
-
-            if fregues_executando.fregues_id == -1:
-                fregues_executando = fregues
-            else:
-                if fregues_executando.prioridade == 2:
-                    fregues_executando = fregues
-                    fila2.atualiza_nq(-1)
-                    fila2.atualiza_ns(1)
-                else:
-                    fila1.atualiza_nq(-1)
-                    fila1.atualiza_ns(1)
-            if id_proximo_fregues < n_fregueses:        
-                id_proximo_fregues += 1
+            
                 
             if id_proximo_fregues % 10 == 0:
                 variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
