@@ -14,8 +14,6 @@ variancia_ns = []
 class Simulador:
     """Classe do simulador
     Attributes:
-        taxa: taxa de entrada das filas
-        t_student: distribuicao para intervalo de confianca de 95%
     """
     def __init__(self):
         self.t_student = Utils.get_distribuicao_t_student()
@@ -67,14 +65,14 @@ class Simulador:
                     
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
-                        fila1.atualiza_tempo_w(w1)
+                        fila1.soma_tempo_w(w1)
                         fila1.remove()
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
                         eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
-                        fila2.atualiza_tempo_w(w2)
+                        fila2.soma_tempo_w(w2)
                         fila2.remove()
                         fregueses_servidos += 1
                         if fregueses_servidos % n_fregueses == 0:
@@ -95,8 +93,8 @@ class Simulador:
             fila1.soma_servico_x(fregues.tempo_servico1)
             fila2.soma_servico_x(fregues.tempo_servico2)
 
-            fila1.atualiza_nq(fila1.tamanho())
-            fila2.atualiza_nq(fila2.tamanho())
+                fila1.soma_nq(fila1.tamanho())
+                fila2.soma_nq(fila2.tamanho())
 
             fila1.adiciona(fregues)
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
@@ -110,16 +108,12 @@ class Simulador:
                 else:
                     if fregues_executando.prioridade == 2:
                         fregues_executando = fregues
-                        fila2.atualiza_nq(-1)
-                        fila2.atualiza_ns(1)
+                        fila2.soma_nq(-1)
+                        fila2.soma_ns(1)
                     else:
-                        fila1.atualiza_nq(-1)
-                        fila1.atualiza_ns(1)
-            id_proximo_fregues += 1
-                
-            if id_proximo_fregues % 10 == 0:
-                variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
-                utilizacao.append((fila1.ns_med + fila2.ns_med)/id_proximo_fregues)
+                        fila1.soma_nq(-1)
+                        fila1.soma_ns(1)
+                id_proximo_fregues += 1
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)

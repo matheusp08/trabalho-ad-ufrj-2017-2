@@ -3,21 +3,6 @@
 	 - Prioridade: 1,2..N
 """
 
-def atualiza_esperanca(atual, fregueses, valor):
-    """ Metodo para atualizar a esperanca
-        Args:
-            atual: valor atual da esperanca a ser atualiza
-            fregueses: lista com os fregueses
-            valor: novo valor a ser adicionado para o calculo da media
-            fator: variavel para saber se temos que somar ou subtrair a esperanca
-                0 se for soma e -1 se for subtracao
-    """
-    # soma incremental
-    return atual + valor
-    # media incremental
-    # n = len(fregueses)
-    # return (atual * (n - 1) + valor)/n if n > 1 else valor
-
 class Fila:
     """ Classe principal da fila
     """
@@ -35,49 +20,47 @@ class Fila:
         self.w_var = 0
 
     def adiciona(self, fregues):
-        """ Metodo para adicionar fregueses na fila
-            tambem atualiza a esperanca de Nq
+        """ Funcao para adicionar fregueses na fila
         """
-        # if fregues.prioridade == 1:
-        #     print("Fregues %d chegou na fila %d no tempo %f" % (fregues.fregues_id, self.prioridade, fregues.tempo_chegada1))
-        # else:
-        #     print("Fregues %d chegou na fila %d no tempo %f" % (fregues.fregues_id, self.prioridade, fregues.tempo_chegada2))
-
         self.fregueses.append(fregues)
     
-    def remove(self):
-        """ Metodo para remover o primeiro fregues da fila
+    def volta_para_fila(self, fregues):
+        """ Funcao para voltar um fregues para o inicio da fila
         """
-        # print("Fregues %d saiu na fila %d" % (self.fregueses[0].fregues_id, self.prioridade))
+        self.fregueses = [fregues] + self.fregueses
+
+    def remove(self):
+        """ Funcao para remover o primeiro fregues da fila
+        """
         self.fregueses = self.fregueses[1:]
 
     def soma_servico_x(self, tempo):
-        """ Metodo para atualizar a esperanca do servico X
+        """ Funcao para somar o tempo do servico X
         """
-        self.x_med = atualiza_esperanca(self.x_med, self.fregueses, tempo)
+        self.x_med += tempo
 
-    def atualiza_tempo_w(self, valor):
-        """ Metodo para atualizar a esperanca de W
+    def soma_tempo_w(self, valor):
+        """ Funcao para somar a esperanca de W
         """
-        self.w_med = atualiza_esperanca(self.w_med, self.fregueses, valor)
+        self.w_med += valor
 
-    def atualiza_nq(self, valor):
-        """ Metodo para atualizar a esperanca de Nq
+    def soma_nq(self, valor):
+        """ Funcao para somar a esperanca de Nq
         """
-        self.nq_med = atualiza_esperanca(self.nq_med, self.fregueses, valor)
+        self.nq_med += valor
 
-    def atualiza_ns(self, valor):
-        """ Metodo para atualizar a esperanca de Ns
+    def soma_ns(self, valor):
+        """ Funcao para somar a esperanca de Ns
         """
-        self.ns_med = atualiza_esperanca(self.ns_med, self.fregueses, valor)
+        self.ns_med += valor
 
     def tamanho(self):
-        """ Metodo para retornar o tamanho da fila
+        """ Funcao para retornar o tamanho da fila
         """
         return len(self.fregueses)
 
     def proximo_fregues(self):
-        """ Metodo para retornar o primeiro fregues da fila
+        """ Funcao para retornar o primeiro fregues da fila
         """
         return self.fregueses[0]
 
@@ -89,13 +72,13 @@ class Fila:
     def atualiza_esperancas(self, n):
         """ Metodo para calcular de fato as esperancas
         """
-        self.x_med /= n
-        self.w_med /= n
-        self.nq_med /= n
-        self.ns_med /= n
+        self.x_med /= n_fregueses
+        self.w_med /= n_fregueses
+        self.nq_med /= n_fregueses
+        self.ns_med /= n_fregueses
 
     def imprime_esperancas(self):
-        """ Metodo para imprimir as esperancas da fila
+        """ Funcao para imprimir as esperancas da fila
         """
         print("Fila %d" % self.prioridade)
         print("E[X]: %f" % self.x_med)

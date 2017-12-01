@@ -18,7 +18,7 @@ class Fregues:
         self.cor = cor
 
     def troca_fila(self, tempo):
-        """ Metodo para mudar o fregues para a chegada na fila 2
+        """ Funcao para mudar o fregues para a chegada na fila 2
         """
         self.prioridade = 2
         self.tempo_chegada2 = tempo
