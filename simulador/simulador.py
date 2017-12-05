@@ -118,9 +118,10 @@ class Simulador:
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
-        # fila1.imprime_esperancas()
-        # fila2.imprime_esperancas()
+        fila1.imprime_esperancas()
+        fila2.imprime_esperancas()
 
-Simulador().executar(10000, 1, 0.8)
-Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor')
-Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns')
+NUM_FREGUESES = 10000
+Simulador().executar(NUM_FREGUESES, 1, 0.6)
+Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', NUM_FREGUESES)
+Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', NUM_FREGUESES)
