@@ -40,20 +40,21 @@ class Simulador:
         """
         global utilizacao
         global variancia_ns
-        fila1 = Fila(1)
-        fila2 = Fila(2) 
+        fila1 = Fila(1, n_rodadas)
+        fila2 = Fila(2, n_rodadas) 
         tempo = 0
         id_proximo_fregues = 0
         fregueses_servidos = 0
-        rodada_atual = 1
+        rodada_atual = 0
         eventos = []
         fregues_executando = Fregues()
-        while rodada_atual <= n_rodadas:
+
+        while rodada_atual < n_rodadas:
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
             tempo += tempo_ate_prox_chegada
 
             while tempo_ate_prox_chegada > 0 and fregues_executando.fregues_id != -1:
-                if fregues_executando.tempo_restante < tempo_ate_prox_chegada:
+                if fregues_executando.tempo_restante <= tempo_ate_prox_chegada:
                     tempo_ate_prox_chegada -= fregues_executando.tempo_restante
                     fregues_executando.tempo_restante = 0
                     tempo_atual = tempo - tempo_ate_prox_chegada
@@ -65,17 +66,18 @@ class Simulador:
                     
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
-                        fila1.soma_tempo_w(w1)
+                        fila1.soma_tempo_w(w1, rodada_atual)
                         fila1.remove()
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
                         eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
-                        fila2.soma_tempo_w(w2)
+                        fila2.soma_tempo_w(w2, rodada_atual)
                         fila2.remove()
                         fregueses_servidos += 1
                         if fregueses_servidos % n_fregueses == 0:
+                            fregueses_servidos = 0
                             rodada_atual += 1
                     
                     if fila1.tamanho() > 0:
@@ -89,12 +91,15 @@ class Simulador:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
-            fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
-            fila1.soma_servico_x(fregues.tempo_servico1)
-            fila2.soma_servico_x(fregues.tempo_servico2)
+            if (id_proximo_fregues * rodada_atual == n_fregueses * n_rodadas):
+                break
 
-            fila1.soma_nq(fila1.tamanho())
-            fila2.soma_nq(fila2.tamanho())
+            fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
+            fila1.soma_servico_x(fregues.tempo_servico1, rodada_atual)
+            fila2.soma_servico_x(fregues.tempo_servico2, rodada_atual)
+
+            fila1.soma_nq(fila1.tamanho(), rodada_atual)
+            fila2.soma_nq(fila2.tamanho(), rodada_atual)
 
             fila1.adiciona(fregues)
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
@@ -103,25 +108,24 @@ class Simulador:
             else:
                 if fregues_executando.prioridade == 2:
                     fregues_executando = fregues
-                    fila2.soma_nq(-1)
-                    fila2.soma_ns(1)
+                    fila2.soma_nq(-1, rodada_atual)
+                    fila2.soma_ns(1, rodada_atual)
                 else:
-                    fila1.soma_nq(-1)
-                    fila1.soma_ns(1)
+                    fila1.soma_nq(-1, rodada_atual)
+                    fila1.soma_ns(1, rodada_atual)
             id_proximo_fregues += 1
 
             # o calculo da varianca de Ns da fila 1 nos permite calcular uma possivel fase transiente
             # if id_proximo_fregues % 10 == 0:
             if id_proximo_fregues > 1:
-                variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
-                utilizacao.append((fila1.ns_med + fila2.ns_med)/id_proximo_fregues)
+                # variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues, rodada_atual))
+                utilizacao.append((fila1.ns_med[1] + fila2.ns_med[1])/id_proximo_fregues)
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-NUM_FREGUESES = 10000
-Simulador().executar(NUM_FREGUESES, 1, 0.6)
-Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', NUM_FREGUESES)
-Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', NUM_FREGUESES)
+Simulador().executar(10000, 2, 0.6)
+Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
+# Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', 10000)
