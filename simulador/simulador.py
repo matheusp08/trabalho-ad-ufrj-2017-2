@@ -151,8 +151,6 @@ class Simulador:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
-            
-                
             if id_proximo_fregues % 10 == 0:
                 variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
                 utilizacao.append((fila1.ns_med + fila2.ns_med)/id_proximo_fregues)
