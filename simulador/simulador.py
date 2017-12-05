@@ -9,7 +9,6 @@ from evento import Evento, TipoEvento
 from plot import Plot
 
 utilizacao = []
-rho_acumulado = 0
 variancia_ns = []
 
 class Simulador:
@@ -41,7 +40,6 @@ class Simulador:
         """
         global utilizacao
         global variancia_ns
-        global rho_acumulado
         fila1 = Fila(1)
         fila2 = Fila(2) 
         tempo = 0
