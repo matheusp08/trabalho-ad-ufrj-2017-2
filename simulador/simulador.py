@@ -48,12 +48,16 @@ class Simulador:
         rodada_atual = 1
         eventos = []
         fregues_executando = Fregues()
-        while rodada_atual <= n_rodadas:
-            tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
+
+        while fregueses_servidos < n_fregueses:
+            if (id_proximo_fregues == n_fregueses):
+                tempo_ate_prox_chegada = 99999
+            else:
+                tempo_ate_prox_chegada = lambd    
             tempo += tempo_ate_prox_chegada
 
             while tempo_ate_prox_chegada > 0 and fregues_executando.fregues_id != -1:
-                if fregues_executando.tempo_restante < tempo_ate_prox_chegada:
+                if fregues_executando.tempo_restante <= tempo_ate_prox_chegada:
                     tempo_ate_prox_chegada -= fregues_executando.tempo_restante
                     fregues_executando.tempo_restante = 0
                     tempo_atual = tempo - tempo_ate_prox_chegada
@@ -89,6 +93,9 @@ class Simulador:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
+            if (id_proximo_fregues == n_fregueses):
+                break
+
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
             fila1.soma_servico_x(fregues.tempo_servico1)
             fila2.soma_servico_x(fregues.tempo_servico2)
@@ -110,18 +117,9 @@ class Simulador:
                     fila1.soma_ns(1)
             id_proximo_fregues += 1
 
-            # o calculo da varianca de Ns da fila 1 nos permite calcular uma possivel fase transiente
-            # if id_proximo_fregues % 10 == 0:
-            if id_proximo_fregues > 1:
-                variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues))
-                utilizacao.append((fila1.ns_med + fila2.ns_med)/id_proximo_fregues)
-
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
-        fila1.imprime_esperancas()
-        fila2.imprime_esperancas()
+        # fila1.imprime_esperancas()
+        # fila2.imprime_esperancas()
 
-NUM_FREGUESES = 10000
-Simulador().executar(NUM_FREGUESES, 1, 0.6)
-Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', NUM_FREGUESES)
-Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', NUM_FREGUESES)
+Simulador().executar(5, 1, 4)

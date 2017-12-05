@@ -11,8 +11,8 @@ class Fregues:
         self.fregues_id = fregues_id
         self.tempo_chegada1 = tempo_chegada
         self.tempo_chegada2 = 0
-        self.tempo_servico1 = Utils.gera_taxa_exp_seed(taxa_servico)
-        self.tempo_servico2 = Utils.gera_taxa_exp_seed(taxa_servico)
+        self.tempo_servico1 = 4
+        self.tempo_servico2 = 2
         self.tempo_restante = self.tempo_servico1
         self.prioridade = 1
         self.cor = cor

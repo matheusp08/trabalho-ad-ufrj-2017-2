@@ -25,4 +25,4 @@ class Evento:
         self.tipo = tipo
         self.prioridade = prioridade
 
-        # print("Evento de %s ocorreu no tempo %f pelo fregues %d de prioridade %d" % (self.tipo.name, self.tempo, self.fregues_id, self.prioridade))
+        print("%d - %s FREGUES %d Fila %d" % (self.tempo, self.tipo.name, self.fregues_id, self.prioridade))
