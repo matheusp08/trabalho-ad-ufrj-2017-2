@@ -16,9 +16,6 @@ class Fila:
         self.w_med = 0
         self.x_med = 0
 
-        # Variancias:
-        self.w_var = 0
-
     def adiciona(self, fregues):
         """ Funcao para adicionar fregueses na fila
         """
@@ -69,7 +66,7 @@ class Fila:
         """
         return ((valor - (self.ns_med/n))**2)/(n-1)
 
-    def atualiza_esperancas(self, n):
+    def atualiza_esperancas(self, n_fregueses):
         """ Metodo para calcular de fato as esperancas
         """
         self.x_med /= n_fregueses

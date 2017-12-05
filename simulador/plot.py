@@ -17,7 +17,7 @@ class Plot:
                 yLabel: texto do eixo y
         """
         tamanho = len(dados)
-        fator = 100
+        fator = 1000
         plt.plot(dados)
         plt.xticks(np.arange(0, tamanho + 1, fator))
         plt.ylabel(y_label)
