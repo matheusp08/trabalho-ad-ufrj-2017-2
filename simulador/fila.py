@@ -10,6 +10,7 @@ class Fila:
     def __init__(self, prioridade, n_rodadas):
         self.prioridade = prioridade
         self.fregueses = []
+        self.n_rodadas = n_rodadas
         # Esperanças
         self.ns_med = [0] * n_rodadas
         self.nq_med = [0] * n_rodadas
@@ -78,10 +79,10 @@ class Fila:
         """ Funcao para imprimir as esperancas da fila
         """
         print("Fila %d" % self.prioridade)
-        print("E[X]: %f" % self.x_med[1])
-        print("E[W]: %f" % self.w_med[1])
-        print("E[Nq]: %f" % self.nq_med[1])
-        print("E[Ns]: %f" % self.ns_med[1])
-        print("E[N]: %f" % (self.nq_med[1] + self.ns_med[1]))
-        print("E[T]: %f" % (self.w_med[1] + self.x_med[1]))
+        print("E[X]: %f" % self.x_med[self.n_rodadas-1])
+        print("E[W]: %f" % self.w_med[self.n_rodadas-1])
+        print("E[Nq]: %f" % self.nq_med[self.n_rodadas-1])
+        print("E[Ns]: %f" % self.ns_med[self.n_rodadas-1])
+        print("E[N]: %f" % (self.nq_med[self.n_rodadas-1] + self.ns_med[self.n_rodadas-1]))
+        print("E[T]: %f" % (self.w_med[self.n_rodadas-1] + self.x_med[self.n_rodadas-1]))
         print("=======================")

@@ -49,6 +49,8 @@ class Simulador:
         eventos = []
         fregues_executando = Fregues()
 
+        # utilizacao = [[] for _ in range(n_rodadas)]
+
         while rodada_atual < n_rodadas:
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
             tempo += tempo_ate_prox_chegada
@@ -79,6 +81,9 @@ class Simulador:
                         if fregueses_servidos % n_fregueses == 0:
                             fregueses_servidos = 0
                             rodada_atual += 1
+                            if rodada_atual < n_rodadas:
+                                fila1.ns_med[rodada_atual] += fila1.ns_med[rodada_atual-1]
+                                fila2.ns_med[rodada_atual] += fila2.ns_med[rodada_atual-1]
                     
                     if fila1.tamanho() > 0:
                         fregues_executando = fila1.proximo_fregues()
@@ -91,7 +96,7 @@ class Simulador:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
-            if (id_proximo_fregues * rodada_atual == n_fregueses * n_rodadas):
+            if (id_proximo_fregues == n_fregueses * n_rodadas):
                 break
 
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
@@ -119,13 +124,15 @@ class Simulador:
             # if id_proximo_fregues % 10 == 0:
             if id_proximo_fregues > 1:
                 # variancia_ns.append(fila1.calcula_variancia_ns(1, id_proximo_fregues, rodada_atual))
-                utilizacao.append((fila1.ns_med[1] + fila2.ns_med[1])/id_proximo_fregues)
+                media = (fila1.ns_med[rodada_atual] + fila2.ns_med[rodada_atual])/id_proximo_fregues
+                utilizacao.append(media)
 
         fila1.atualiza_esperancas(n_fregueses)
         fila2.atualiza_esperancas(n_fregueses)
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(10000, 2, 0.6)
-Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
+Simulador().executar(10000, 5, 0.6)
+Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', 50000)
+# Plot().desenha_grafico(utilizacao[1], 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
 # Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', 10000)
