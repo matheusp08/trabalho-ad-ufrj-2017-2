@@ -2,6 +2,7 @@
 """
 from datetime import datetime
 from matplotlib import pyplot as plt
+import sys
 from fila import Fila
 from fregues import Fregues
 from utils import Utils
@@ -132,7 +133,20 @@ class Simulador:
         fila1.imprime_esperancas()
         fila2.imprime_esperancas()
 
-Simulador().executar(10000, 5, 0.6)
-Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', 50000)
-# Plot().desenha_grafico(utilizacao[1], 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
-# Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', 10000)
+
+def main(argv):
+
+    if(len(sys.argv) < 4):
+        print("Rode com os seguintes parametros: python3 simulador.py numero_rodadas fregueses_por_rodada rho")
+        sys.exit()
+    NUMERO_RODADAS = int(sys.argv[1])
+    FREGUESES_POR_RODADAS = int(sys.argv[2])
+    RHO = float(sys.argv[3])
+
+    Simulador().executar(FREGUESES_POR_RODADAS, NUMERO_RODADAS, RHO)
+    Plot().desenha_grafico(utilizacao, 'Numero de Fregueses', 'Utilizacao do Servidor', FREGUESES_POR_RODADAS*NUMERO_RODADAS)
+    # Plot().desenha_grafico(utilizacao[1], 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
+    # Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', 10000)
+
+
+if __name__ == "__main__": main(sys.argv)
