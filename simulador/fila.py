@@ -60,7 +60,9 @@ class Fila:
     def proximo_fregues(self):
         """ Funcao para retornar o primeiro fregues da fila
         """
-        return self.fregueses[0]
+        proximo_fregues = self.fregueses[0]
+        self.remove()
+        return proximo_fregues
 
     def calcula_variancia_ns(self, valor, n_fregueses, rodada):
         """ Metodo para calcular a variancia de Ns
