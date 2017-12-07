@@ -37,17 +37,17 @@ class Simulador:
         total_fregueses_servidos = 0     # total de fregueses que passaram pelo sistema
         fregueses_criados = 0            # total de fregueses criados na simulacao
         
+        rodada_atual = 0                     # rodada da fase transiente
+        
         if n_transiente > 0:
-            rodada_atual = 0                     # rodada da fase transiente
             id_proximo_fregues = -n_transiente   # id do proximo fregues a ser criado (fase transiente arbitraria)
-        else: 
-            rodada_atual = 1
+        else:
             id_proximo_fregues = 0               # id do proximo fregues a ser criado 
 
         inicio = datetime.now()          # tempo inicial de execucao da simulacao para calculo posterior
         
         # enquanto nao foram executadas n rodadas, conforme parametro de entrada, o programa permanece no loop abaixo
-        while total_fregueses_servidos <= n_rodadas * fregueses_por_rodada:
+        while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:
             # eh gerado o tempo ate a chegada de um proximo fregues usando a taxa de chegada lambd
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
             # e com isso, o tempo do sistema eh somado do tempo que o proximo fregues chegara
@@ -81,7 +81,7 @@ class Simulador:
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
                         fila2.soma_tempo_w(w2, cor)
-                        if fregues_executando.fregues_id >= 0:
+                        if fregues_executando.cor > 0:
                             total_fregueses_servidos += 1
                     
                     # agora temos que colocar alguem em execucao se alguma das filas nao estiver vazia, lembrando que a prioridade
@@ -99,8 +99,11 @@ class Simulador:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
-            if (id_proximo_fregues % fregueses_por_rodada == 0): 
-                rodada_atual += 1 
+            if id_proximo_fregues % fregueses_por_rodada == 0:
+                rodada_atual += 1            
+
+            if rodada_atual > n_rodadas:
+                break
 
             # agora tratamos a chegada de um novo fregues, criando um novo objeto Fregues, adicionando-o na fila 1, lancando um
             # evento de chegada 1 e atualizando as metricas X1, X2, Nq1 e Nq2
@@ -111,7 +114,6 @@ class Simulador:
             fila1.soma_nq(fila1.tamanho(), rodada_atual)
             fila2.soma_nq(fila2.tamanho(), rodada_atual)
 
-            fila1.adiciona(fregues)
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
             # se nao tem ninguem executando, esse fregues ja vai ser servido diretamente
@@ -125,6 +127,7 @@ class Simulador:
                     fila2.soma_ns(1, rodada_atual)
                 # se existe algum fregues de prioridade 1 executando, o novo fregues eh somente adicionado na fila 1
                 else:
+                    fila1.adiciona(fregues)
                     fila1.soma_ns(1, rodada_atual)
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
