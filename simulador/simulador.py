@@ -8,9 +8,6 @@ from utils import Utils
 from evento import Evento, TipoEvento
 from plot import Plot
 
-UTILIZACAO = []
-VARIANCIA_NS = []
-
 class Simulador:
     """Classe do simulador
     Attributes:
@@ -22,8 +19,11 @@ class Simulador:
             n_rodadas: numero de rodadas da simulacao.
             rho: taxa
         """
-        global UTILIZACAO
-        global VARIANCIA_NS
+
+        pontos = 1000 # numero de amostras no grafico
+        intervalo = int((fregueses_por_rodada + n_transiente)/pontos) # intervalo entre cada amostra para o grafico
+        # objeto da clase Plot, para desenhar os graficos no final da simulacao
+        plot = Plot(n_rodadas, fregueses_por_rodada, n_transiente, pontos)
 
         lambd = rho/2                    # taxa de chegada
         taxa_servico = 1                 # taxa de servico
@@ -133,11 +133,13 @@ class Simulador:
             id_proximo_fregues += 1
             fregueses_criados += 1
             
-            # calculamos a variancia da utilizacao do sistema para talvez utilizar para achar a fase transiente
-            # if fregueses_criados % 10 == 0:
-            #     # VARIANCIA_NS.append(fila1.calcula_variancia_ns(1, id_proximo_fregues, rodada_atual))
-            #     media = (fila1.ns_med[rodada_atual] + fila2.ns_med[rodada_atual])/fregueses_criados
-            #     UTILIZACAO.append(media)
+            if fregueses_criados % intervalo == 0:
+                plot.ns1.append((fila1.ns_med[0] + fila1.ns_med[1]) / fregueses_criados)
+                plot.nq1.append((fila1.nq_med[0] + fila1.nq_med[1]) / fregueses_criados)
+                plot.w1.append((fila1.w_med[0] + fila1.w_med[1]) / fregueses_criados)
+                plot.ns2.append((fila2.ns_med[0] + fila2.ns_med[1]) / fregueses_criados)
+                plot.nq2.append((fila2.nq_med[0] + fila2.nq_med[1]) / fregueses_criados)
+                plot.w2.append((fila2.w_med[0] + fila2.w_med[1]) / fregueses_criados)
 
         #atualizamos as esperancas acumuladas durante a simulacao
         fila1.atualiza_esperancas(fregueses_por_rodada)
@@ -149,6 +151,9 @@ class Simulador:
         fim = datetime.now()
         total = fim - inicio
         print("Tempo de execucao: " + str(total))
+        
+        # agora chamamos o modulo para desenhar os graficos das metricas calculadas durante a simulacao
+        plot.desenha(fregueses_criados)
 
 def main(argv):
     """ Funcao main
