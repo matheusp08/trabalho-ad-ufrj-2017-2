@@ -8,7 +8,7 @@ class Utils:
     """ Classe que contem metodos utilitarios
     """
 
-    # semente parao programa sempre gerar os mesmo numeros aleatorios
+    # semente para o programa sempre gerar os mesmo numeros aleatorios
     nprand.seed(42)
 
     @staticmethod

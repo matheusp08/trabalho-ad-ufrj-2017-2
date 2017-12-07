@@ -12,16 +12,16 @@ class Fila:
         self.fregueses = []
         self.n_rodadas = n_rodadas
         # Esperanças
-        self.ns_med = [0] * n_rodadas
-        self.nq_med = [0] * n_rodadas
-        self.w_med = [0] * n_rodadas
-        self.x_med = [0] * n_rodadas
+        self.ns_med = [0] * (n_rodadas + 1) 
+        self.nq_med = [0] * (n_rodadas + 1)
+        self.w_med = [0] * (n_rodadas + 1)
+        self.x_med = [0] * (n_rodadas + 1)
 
     def adiciona(self, fregues):
         """ Funcao para adicionar fregueses na fila
         """
         self.fregueses.append(fregues)
-    
+
     def volta_para_fila(self, fregues):
         """ Funcao para voltar um fregues para o inicio da fila
         """
@@ -62,10 +62,10 @@ class Fila:
         """
         return self.fregueses[0]
 
-    def calcula_variancia_ns(self, valor, n, rodada):
+    def calcula_variancia_ns(self, valor, n_fregueses, rodada):
         """ Metodo para calcular a variancia de Ns
         """
-        return ((valor - (self.ns_med[rodada]/n))**2)/(n-1)
+        return ((valor - (self.ns_med[rodada]/n_fregueses))**2)/(n_fregueses-1)
 
     def atualiza_esperancas(self, n_fregueses):
         """ Metodo para calcular de fato as esperancas
@@ -79,7 +79,7 @@ class Fila:
         """ Funcao para imprimir as esperancas da fila
         """
         print("Fila %d" % self.prioridade)
-        # print("E[X]: %f" % self.x_med[self.n_rodadas-1])
+        print("E[X]: %f" % self.x_med[self.n_rodadas-1])
         print("E[W]: %f" % self.w_med[self.n_rodadas-1])
         print("E[Nq]: %f" % self.nq_med[self.n_rodadas-1])
         print("E[Ns]: %f" % self.ns_med[self.n_rodadas-1])
