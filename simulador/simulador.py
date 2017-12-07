@@ -38,19 +38,21 @@ class Simulador:
         tempo = 0                        # tempo atual da simulacao
         fregues_executando = None        # inicializacao nula do fregues executando
         fregueses_servidos_na_rodada = 0 # numero de fregueses servidos na rodada atual
-        inicio = datetime.now()          # tempo inicial de execucao da simulacao para calculo posterior
-
+        fregueses_criados = 0.           # total de fregueses criados na simulacao
+        
         # utilizacao = [[] for _ in range(n_rodadas)]
 
         if fase_transiente:
-            rodada_atual = 1                     # rodada da fase transiente
-            id_proximo_fregues = 0           # id do proximo fregues a ser criado (fase transiente arbitraria)
+            rodada_atual = 0                     # rodada da fase transiente
+            id_proximo_fregues = -2000           # id do proximo fregues a ser criado (fase transiente arbitraria)
         else: 
             rodada_atual = 1
-            id_proximo_fregues = 0           # id do proximo fregues a ser criado 
+            id_proximo_fregues = 0               # id do proximo fregues a ser criado 
 
+        inicio = datetime.now()          # tempo inicial de execucao da simulacao para calculo posterior
+        
         # enquanto nao foram executadas n rodadas, conforme parametro de entrada, o programa permanece no loop abaixo
-        while rodada_atual < n_rodadas:
+        while rodada_atual <= n_rodadas:
             # eh gerado o tempo ate a chegada de um proximo fregues usando a taxa de chegada lambd
             tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
             # e com isso, o tempo do sistema eh somado do tempo que o proximo fregues chegara
@@ -88,11 +90,12 @@ class Simulador:
                         fregueses_servidos_na_rodada += 1
                         # aqui verificamos se o numero de fregueses servidos alcancou o total de fregueses por rodada, se sim,
                         # atualizamos o numero da rodada atual e zeramos o numero de fregueses servidos na rodada
-                        if fregueses_servidos_na_rodada == fregueses_por_rodada:
+                        if (fase_transiente and id_proximo_fregues >= 0) or fregueses_servidos_na_rodada == fregueses_por_rodada:
+                            fase_transiente = False
                             fregueses_servidos_na_rodada = 0
                             rodada_atual += 1
                             # entender melhor pq eh necessario fazer isso aqui
-                            if rodada_atual < n_rodadas:
+                            if rodada_atual <= n_rodadas:
                                 fila1.ns_med[rodada_atual] += fila1.ns_med[rodada_atual-1]
                                 fila2.ns_med[rodada_atual] += fila2.ns_med[rodada_atual-1]
                     
@@ -142,17 +145,18 @@ class Simulador:
                     fila1.soma_ns(1, rodada_atual)
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
+            fregueses_criados += 1
             # calculamos a variancia da utilizacao do sistema para talvez utilizar para achar a fase transiente
-            if id_proximo_fregues % 10 == 0:
+            if fregueses_criados % 10 == 0:
                 # VARIANCIA_NS.append(fila1.calcula_variancia_ns(1, id_proximo_fregues, rodada_atual))
-                media = (fila1.ns_med[rodada_atual] + fila2.ns_med[rodada_atual])/id_proximo_fregues
+                media = (fila1.ns_med[rodada_atual] + fila2.ns_med[rodada_atual])/fregueses_criados
                 UTILIZACAO.append(media)
 
         #atualizamos as esperancas acumuladas durante a simulacao
         fila1.atualiza_esperancas(fregueses_por_rodada)
         fila2.atualiza_esperancas(fregueses_por_rodada)
-        # fila1.imprime_esperancas()
-        # fila2.imprime_esperancas()
+        fila1.imprime_esperancas()
+        fila2.imprime_esperancas()
 
         # e por fim, calculamos o tempo total da simulacao
         fim = datetime.now()
@@ -172,7 +176,7 @@ def main(argv):
     rho = float(argv[3])
     fase_transiente = True
 
-    Simulador().executar(fregueses_por_rodada, n_rodadas, rho, fase_transiente)
+    Simulador().executar(n_rodadas, fregueses_por_rodada, rho, fase_transiente)
     Plot().desenha_grafico(UTILIZACAO, 'Numero de Fregueses', 'Utilizacao do Servidor', fregueses_por_rodada*n_rodadas)
     # Plot().desenha_grafico(utilizacao[1], 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
     # Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', 10000)
