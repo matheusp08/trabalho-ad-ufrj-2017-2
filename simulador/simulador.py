@@ -6,8 +6,7 @@ from fila import Fila
 from fregues import Fregues
 from utils import Utils
 from evento import Evento, TipoEvento
-from plot import Plot
-from metric import Metric
+from metrica import Metrica
 from prettytable import PrettyTable
 
 class Simulador:
@@ -22,23 +21,17 @@ class Simulador:
             rho: taxa
         """
 
-        pontos = 1000 # numero de amostras no grafico
-        intervalo = int((fregueses_por_rodada + n_transiente)/pontos) # intervalo entre cada amostra para o grafico
-        # objeto da clase Plot, para desenhar os graficos no final da simulacao
-        plot = Plot(n_rodadas, fregueses_por_rodada, n_transiente, pontos)
-
         lambd = rho/2                    # taxa de chegada
         taxa_servico = 1                 # taxa de servico
 
         fila1 = Fila(1)       # fila 1, mais prioritaria (chegadas exogenas)
         fila2 = Fila(2)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
-        metricas = Metric(n_rodadas, fregueses_por_rodada)
+        metricas = Metrica(n_rodadas, fregueses_por_rodada)
         eventos = []                     # lista de eventos
 
         tempo = 0                        # tempo atual da simulacao
         fregues_executando = None        # inicializacao nula do fregues executando
         total_fregueses_servidos = 0     # total de fregueses que passaram pelo sistema
-        fregueses_criados = 0            # total de fregueses criados na simulacao
         
         rodada_atual = 0                     # rodada da fase transiente
         
@@ -134,15 +127,6 @@ class Simulador:
                     metricas.acumula_ns1(1, rodada_atual)
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
-            fregueses_criados += 1
-            
-            # if fregueses_criados % intervalo == 0:
-            #     plot.ns1.append((fila1.ns_med[0] + fila1.ns_med[1]) / fregueses_criados)
-            #     plot.nq1.append((fila1.nq_med[0] + fila1.nq_med[1]) / fregueses_criados)
-            #     plot.w1.append((fila1.w_med[0] + fila1.w_med[1]) / fregueses_criados)
-            #     plot.ns2.append((fila2.ns_med[0] + fila2.ns_med[1]) / fregueses_criados)
-            #     plot.nq2.append((fila2.nq_med[0] + fila2.nq_med[1]) / fregueses_criados)
-            #     plot.w2.append((fila2.w_med[0] + fila2.w_med[1]) / fregueses_criados)
 
         #imprimindo parametros de entrada
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
@@ -152,11 +136,11 @@ class Simulador:
         # calculando e imprimindo as esperancas
         metricas.calcula_esp()
 
-        # imprimindo as variancias
+        # calculando e imprimindo as variancias
         metricas.calcula_var()
 
-        # agora chamamos o modulo para desenhar os graficos das metricas calculadas durante a simulacao
-        #plot.desenha(fregueses_criados)
+        # calcula e imprime os intervalos de confianca
+        metricas.calcula_ic()
 
 def main(argv):
     """ Funcao main
