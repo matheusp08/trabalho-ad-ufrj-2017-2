@@ -104,7 +104,7 @@ class Simulador:
                     tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues % fregueses_por_rodada == 0:
-                metricas.calcula_var(rodada_atual, fila1.w_med, fila2.w_med)
+                metricas.calcula_var(rodada_atual, fila1.w_med[rodada_atual], fila2.w_med[rodada_atual], fila1.nq_med[rodada_atual], fila2.nq_med[rodada_atual], fila1.ns_med[rodada_atual], fila2.ns_med[rodada_atual])
                 rodada_atual += 1            
 
             if rodada_atual > n_rodadas:
@@ -116,6 +116,8 @@ class Simulador:
             fila1.soma_servico_x(fregues.tempo_servico1, rodada_atual)
             fila2.soma_servico_x(fregues.tempo_servico2, rodada_atual)
 
+            metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
+            metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
             fila1.soma_nq(fila1.tamanho(), rodada_atual)
             fila2.soma_nq(fila2.tamanho(), rodada_atual)
 
@@ -129,10 +131,12 @@ class Simulador:
                 if fregues_executando.prioridade == 2:
                     fila2.volta_para_fila(fregues_executando)
                     fregues_executando = fregues
+                    metricas.acumula_ns2(1, rodada_atual)
                     fila2.soma_ns(1, rodada_atual)
                 # se existe algum fregues de prioridade 1 executando, o novo fregues eh somente adicionado na fila 1
                 else:
                     fila1.adiciona(fregues)
+                    metricas.acumula_ns1(1, rodada_atual)
                     fila1.soma_ns(1, rodada_atual)
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
@@ -158,7 +162,7 @@ class Simulador:
         print("Tempo de execucao: " + str(total))
         
         # agora chamamos o modulo para desenhar os graficos das metricas calculadas durante a simulacao
-        plot.desenha(fregueses_criados)
+        #plot.desenha(fregueses_criados)
 
 def main(argv):
     """ Funcao main
