@@ -29,8 +29,8 @@ class Simulador:
         lambd = rho/2                    # taxa de chegada
         taxa_servico = 1                 # taxa de servico
 
-        fila1 = Fila(1, n_rodadas)       # fila 1, mais prioritaria (chegadas exogenas)
-        fila2 = Fila(2, n_rodadas)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
+        fila1 = Fila(1)       # fila 1, mais prioritaria (chegadas exogenas)
+        fila2 = Fila(2)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
         metricas = Metric(n_rodadas, fregueses_por_rodada)
         eventos = []                     # lista de eventos
 
@@ -42,11 +42,11 @@ class Simulador:
         rodada_atual = 0                     # rodada da fase transiente
         
         if n_transiente > 0:
+            if fregueses_por_rodada < n_transiente:
+                n_transiente = fregueses_por_rodada
             id_proximo_fregues = -n_transiente   # id do proximo fregues a ser criado (fase transiente arbitraria)
         else:
             id_proximo_fregues = 0               # id do proximo fregues a ser criado 
-
-        inicio = datetime.now()          # tempo inicial de execucao da simulacao para calculo posterior
         
         # enquanto nao foram executadas n rodadas, conforme parametro de entrada, o programa permanece no loop abaixo
         while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:
@@ -74,8 +74,7 @@ class Simulador:
                     # removemos ele da fila 1 e adicionamos na fila 2, gerando um evento de chegada 2
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
-                        metricas.acumula_w1(w1, rodada_atual)
-                        fila1.soma_tempo_w(w1, cor)
+                        metricas.acumula_w1(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
                         eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
@@ -83,8 +82,7 @@ class Simulador:
                     # pois o mesmo agora saira do sistema, terminando sua execucao
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
-                        metricas.acumula_w2(w2, rodada_atual)
-                        fila2.soma_tempo_w(w2, cor)
+                        metricas.acumula_w2(w2, cor)
                         if fregues_executando.cor > 0:
                             total_fregueses_servidos += 1
                     
@@ -104,7 +102,6 @@ class Simulador:
                     tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues % fregueses_por_rodada == 0:
-                metricas.calcula_var(rodada_atual, fila1.w_med[rodada_atual], fila2.w_med[rodada_atual], fila1.nq_med[rodada_atual], fila2.nq_med[rodada_atual], fila1.ns_med[rodada_atual], fila2.ns_med[rodada_atual])
                 rodada_atual += 1            
 
             if rodada_atual > n_rodadas:
@@ -113,13 +110,11 @@ class Simulador:
             # agora tratamos a chegada de um novo fregues, criando um novo objeto Fregues, adicionando-o na fila 1, lancando um
             # evento de chegada 1 e atualizando as metricas X1, X2, Nq1 e Nq2
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
-            fila1.soma_servico_x(fregues.tempo_servico1, rodada_atual)
-            fila2.soma_servico_x(fregues.tempo_servico2, rodada_atual)
+            metricas.acumula_x1(fregues.tempo_servico1, rodada_atual)
+            metricas.acumula_x2(fregues.tempo_servico2, rodada_atual)
 
             metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
             metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
-            fila1.soma_nq(fila1.tamanho(), rodada_atual)
-            fila2.soma_nq(fila2.tamanho(), rodada_atual)
 
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
@@ -132,35 +127,28 @@ class Simulador:
                     fila2.volta_para_fila(fregues_executando)
                     fregues_executando = fregues
                     metricas.acumula_ns2(1, rodada_atual)
-                    fila2.soma_ns(1, rodada_atual)
                 # se existe algum fregues de prioridade 1 executando, o novo fregues eh somente adicionado na fila 1
                 else:
                     fila1.adiciona(fregues)
                     metricas.acumula_ns1(1, rodada_atual)
-                    fila1.soma_ns(1, rodada_atual)
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
             fregueses_criados += 1
             
-            if fregueses_criados % intervalo == 0:
-                plot.ns1.append((fila1.ns_med[0] + fila1.ns_med[1]) / fregueses_criados)
-                plot.nq1.append((fila1.nq_med[0] + fila1.nq_med[1]) / fregueses_criados)
-                plot.w1.append((fila1.w_med[0] + fila1.w_med[1]) / fregueses_criados)
-                plot.ns2.append((fila2.ns_med[0] + fila2.ns_med[1]) / fregueses_criados)
-                plot.nq2.append((fila2.nq_med[0] + fila2.nq_med[1]) / fregueses_criados)
-                plot.w2.append((fila2.w_med[0] + fila2.w_med[1]) / fregueses_criados)
+            # if fregueses_criados % intervalo == 0:
+            #     plot.ns1.append((fila1.ns_med[0] + fila1.ns_med[1]) / fregueses_criados)
+            #     plot.nq1.append((fila1.nq_med[0] + fila1.nq_med[1]) / fregueses_criados)
+            #     plot.w1.append((fila1.w_med[0] + fila1.w_med[1]) / fregueses_criados)
+            #     plot.ns2.append((fila2.ns_med[0] + fila2.ns_med[1]) / fregueses_criados)
+            #     plot.nq2.append((fila2.nq_med[0] + fila2.nq_med[1]) / fregueses_criados)
+            #     plot.w2.append((fila2.w_med[0] + fila2.w_med[1]) / fregueses_criados)
 
-        #atualizamos as esperancas acumuladas durante a simulacao
-        fila1.atualiza_esperancas(fregueses_por_rodada)
-        fila2.atualiza_esperancas(fregueses_por_rodada)
-        fila1.imprime_esperancas()
-        fila2.imprime_esperancas()
+        # calculando e imprimindo as esperancas
+        metricas.calcula_esp()
 
-        # e por fim, calculamos o tempo total da simulacao
-        fim = datetime.now()
-        total = fim - inicio
-        print("Tempo de execucao: " + str(total))
-        
+        # imprimindo as variancias
+        # metricas.calcula_var()
+
         # agora chamamos o modulo para desenhar os graficos das metricas calculadas durante a simulacao
         #plot.desenha(fregueses_criados)
 
@@ -174,13 +162,16 @@ def main(argv):
 
     n_rodadas = int(argv[1])
     fregueses_por_rodada = int(argv[2])
-    rho = float(argv[3])
-    n_transiente = 5000
+    n_transiente = int(argv[3])
+    rho = float(argv[4])
+
+    inicio = datetime.now()
 
     Simulador().executar(n_rodadas, fregueses_por_rodada, rho, n_transiente)
-    # Plot().desenha_grafico(UTILIZACAO, 'Numero de Fregueses', 'Utilizacao do Servidor', fregueses_por_rodada*n_rodadas)
-    # Plot().desenha_grafico(utilizacao[1], 'Numero de Fregueses', 'Utilizacao do Servidor', 10000)
-    # Plot().desenha_grafico(variancia_ns, 'Numero de Fregueses', 'Variancia de Ns', 10000)
+
+    fim = datetime.now()
+    total = fim - inicio
+    print("Tempo de execucao: " + str(total))
 
 if __name__ == "__main__":
     main(sys.argv)

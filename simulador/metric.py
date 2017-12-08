@@ -6,14 +6,14 @@ import math
 class Metric:
     def __init__(self, n_rodadas, fregueses_por_rodada):
         # Criando matrizes para guardar cada valor de w1 (multiplos valores) por rodada. 
-        self.x1 = [[]] * (n_rodadas + 1) 
-        self.x2 = [[]] * (n_rodadas + 1) 
-        self.w1 = [[]] * (n_rodadas + 1) 
-        self.w2 = [[]] * (n_rodadas + 1)
-        self.nq1 = [[]] * (n_rodadas + 1)
-        self.nq2 = [[]] * (n_rodadas + 1)
-        self.ns1 = [[]] * (n_rodadas + 1)
-        self.ns2 = [[]] * (n_rodadas + 1)
+        self.x1 = [[] for _ in range(n_rodadas+1)]
+        self.x2 = [[] for _ in range(n_rodadas+1)]
+        self.w1 = [[] for _ in range(n_rodadas+1)]
+        self.w2 = [[] for _ in range(n_rodadas+1)]
+        self.nq1 = [[] for _ in range(n_rodadas+1)]
+        self.nq2 = [[] for _ in range(n_rodadas+1)]
+        self.ns1 = [[] for _ in range(n_rodadas+1)]
+        self.ns2 = [[] for _ in range(n_rodadas+1)]
         self.var_nq1 = [-1] * (n_rodadas +1)
         self.var_nq2 = [-1] * (n_rodadas +1)
         self.var_ns1 = [-1] * (n_rodadas +1)
@@ -86,9 +86,13 @@ class Metric:
             nq2_med = sum(self.nq2[rodada])/self.fregueses_por_rodada
 
             # Prints para Debug
-            print('[Rodada ', rodada, ']\n- E[W1]: ', w1_med, '.\n- E[W2]: ', w2_med, '.', sep='')
-            print('- E[Nq1]: ', nq1_med, '.\n- E[Nq2]: ', nq2_med, '.', sep='')
-            print('- E[Ns1]: ', ns1_med, '.\n- E[Ns2]: ', ns2_med, '.\n', sep='')
+            print("[Rodada %d]" % rodada)
+            print("- E[W1]: %.4f" % w1_med)
+            print("- E[W2]: %.4f" % w2_med)
+            print("- E[Nq1]: %.4f" % nq1_med)
+            print("- E[Nq2]: %.4f" % nq2_med)
+            print("- E[Ns1]: %.4f" % ns1_med)
+            print("- E[Ns2]: %.4f" % ns2_med)
 
     def calcula_var(self, rodada):
         ''' Calcula os valores das variancias e desvios padroes de w1 e w2
