@@ -7,6 +7,7 @@ from fregues import Fregues
 from utils import Utils
 from evento import Evento, TipoEvento
 from plot import Plot
+from metric import Metric
 
 class Simulador:
     """Classe do simulador
@@ -30,6 +31,7 @@ class Simulador:
 
         fila1 = Fila(1, n_rodadas)       # fila 1, mais prioritaria (chegadas exogenas)
         fila2 = Fila(2, n_rodadas)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
+        metricas = Metric(n_rodadas, fregueses_por_rodada)
         eventos = []                     # lista de eventos
 
         tempo = 0                        # tempo atual da simulacao
@@ -72,6 +74,7 @@ class Simulador:
                     # removemos ele da fila 1 e adicionamos na fila 2, gerando um evento de chegada 2
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
+                        metricas.acumula_w1(w1, rodada_atual)
                         fila1.soma_tempo_w(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
@@ -80,6 +83,7 @@ class Simulador:
                     # pois o mesmo agora saira do sistema, terminando sua execucao
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
+                        metricas.acumula_w2(w2, rodada_atual)
                         fila2.soma_tempo_w(w2, cor)
                         if fregues_executando.cor > 0:
                             total_fregueses_servidos += 1
@@ -100,6 +104,7 @@ class Simulador:
                     tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues % fregueses_por_rodada == 0:
+                metricas.calcula_var(rodada_atual, fila1.w_med, fila2.w_med)
                 rodada_atual += 1            
 
             if rodada_atual > n_rodadas:
