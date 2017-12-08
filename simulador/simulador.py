@@ -8,6 +8,7 @@ from utils import Utils
 from evento import Evento, TipoEvento
 from plot import Plot
 from metric import Metric
+from prettytable import PrettyTable
 
 class Simulador:
     """Classe do simulador
@@ -143,11 +144,16 @@ class Simulador:
             #     plot.nq2.append((fila2.nq_med[0] + fila2.nq_med[1]) / fregueses_criados)
             #     plot.w2.append((fila2.w_med[0] + fila2.w_med[1]) / fregueses_criados)
 
+        #imprimindo parametros de entrada
+        tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
+        tabela_parametros.add_row([n_rodadas, fregueses_por_rodada, n_transiente, rho, lambd])
+        print(tabela_parametros)
+
         # calculando e imprimindo as esperancas
         metricas.calcula_esp()
 
         # imprimindo as variancias
-        # metricas.calcula_var()
+        metricas.calcula_var()
 
         # agora chamamos o modulo para desenhar os graficos das metricas calculadas durante a simulacao
         #plot.desenha(fregueses_criados)
@@ -167,8 +173,9 @@ def main(argv):
 
     inicio = datetime.now()
 
+    
     Simulador().executar(n_rodadas, fregueses_por_rodada, rho, n_transiente)
-
+    
     fim = datetime.now()
     total = fim - inicio
     print("Tempo de execucao: " + str(total))
