@@ -94,7 +94,7 @@ class Simulador:
                     tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues % fregueses_por_rodada == 0:
-                print("Fim da rodada", rodada_atual)
+                #print("Fim da rodada", rodada_atual)
                 rodada_atual += 1            
 
             if rodada_atual > n_rodadas:
@@ -127,7 +127,7 @@ class Simulador:
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
 
-        print("Calculando e imprimindo metricas")
+        #print("Calculando e imprimindo metricas")
         
         #imprimindo parametros de entrada
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
