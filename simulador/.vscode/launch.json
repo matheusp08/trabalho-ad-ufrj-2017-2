@@ -22,8 +22,8 @@
             "args": [
                 "5",     // numero de rodadas
                 "10000", // fregueses por rodada 
-                "2000",  // fregueses da fase transiente (rodada 0)
-                "0.6"    // rho
+                "5000",  // fregueses da fase transiente (rodada 0)
+                "0.4"    // rho
             ]
         },
         {

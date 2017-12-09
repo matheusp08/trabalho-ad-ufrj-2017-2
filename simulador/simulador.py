@@ -5,7 +5,7 @@ from datetime import datetime
 from fila import Fila
 from fregues import Fregues
 from utils import Utils
-from evento import Evento, TipoEvento
+# from evento import Evento, TipoEvento
 from metrica import Metrica
 from prettytable import PrettyTable
 
@@ -27,7 +27,7 @@ class Simulador:
         fila1 = Fila(1)       # fila 1, mais prioritaria (chegadas exogenas)
         fila2 = Fila(2)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
         metricas = Metrica(n_rodadas, fregueses_por_rodada)
-        eventos = []                     # lista de eventos
+        # eventos = []                     # lista de eventos
 
         tempo = 0                        # tempo atual da simulacao
         fregues_executando = None        # inicializacao nula do fregues executando
@@ -36,8 +36,6 @@ class Simulador:
         rodada_atual = 0                     # rodada da fase transiente
         
         if n_transiente > 0:
-            if fregueses_por_rodada < n_transiente:
-                n_transiente = fregueses_por_rodada
             id_proximo_fregues = -n_transiente   # id do proximo fregues a ser criado (fase transiente arbitraria)
         else:
             id_proximo_fregues = 0               # id do proximo fregues a ser criado 
@@ -59,11 +57,11 @@ class Simulador:
                     tempo_atual = tempo - tempo_ate_prox_chegada
                     cor = fregues_executando.cor
                     # geramos um evento de fim de servico
-                    eventos.append(
-                        Evento(tempo_atual,
-                            fregues_executando.fregues_id,
-                            TipoEvento.FIM_SERVICO,
-                            fregues_executando.prioridade))
+                    # eventos.append(
+                        # Evento(tempo_atual,
+                            # fregues_executando.fregues_id,
+                            # TipoEvento.FIM_SERVICO,
+                            # fregues_executando.prioridade))
                     # e agora verificamos se o fregues que estava executando era da fila 1, se sim, atualizamos a metrica W1, 
                     # removemos ele da fila 1 e adicionamos na fila 2, gerando um evento de chegada 2
                     if fregues_executando.prioridade == 1:
@@ -71,7 +69,7 @@ class Simulador:
                         metricas.acumula_w1(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
-                        eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
+                        # eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
                     # se o fregues que terminou de executar era da fila 2, basta atualizarmos a metrica W2 e removermos ele da fila 2,
                     # pois o mesmo agora saira do sistema, terminando sua execucao
                     else:
@@ -96,6 +94,7 @@ class Simulador:
                     tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues % fregueses_por_rodada == 0:
+                print("Fim da rodada", rodada_atual)
                 rodada_atual += 1            
 
             if rodada_atual > n_rodadas:
@@ -110,7 +109,7 @@ class Simulador:
             metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
             metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
 
-            eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+            # eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
             # se nao tem ninguem executando, esse fregues ja vai ser servido diretamente
             if fregues_executando is None:
@@ -128,6 +127,8 @@ class Simulador:
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
 
+        print("Calculando e imprimindo metricas")
+        
         #imprimindo parametros de entrada
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
         tabela_parametros.add_row([n_rodadas, fregueses_por_rodada, n_transiente, rho, lambd])
@@ -157,9 +158,8 @@ def main(argv):
 
     inicio = datetime.now()
 
-    
     Simulador().executar(n_rodadas, fregueses_por_rodada, rho, n_transiente)
-    
+
     fim = datetime.now()
     total = fim - inicio
     print("Tempo de execucao: " + str(total))

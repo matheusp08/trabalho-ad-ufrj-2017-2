@@ -9,7 +9,7 @@ class Utils:
     """
 
     # semente para o programa sempre gerar os mesmo numeros aleatorios
-    nprand.seed(42)
+    nprand.seed(51)
 
     @staticmethod
     def gera_taxa_exp_seed(taxa):
