@@ -10,9 +10,6 @@ from metrica import Metrica
 from prettytable import PrettyTable
 
 class Simulador:
-    """Classe do simulador
-    Attributes:
-    """
     def executar(self, n_rodadas, fregueses_por_rodada, rho, n_transiente):
         """ Funcao de execucao do simulador
         Args:
@@ -21,65 +18,61 @@ class Simulador:
             rho: taxa
         """
 
-        lambd = rho/2                    # taxa de chegada
-        taxa_servico = 1                 # taxa de servico
+        ''' Inicializacao '''
+        lambd = rho/2                   # taxa de chegada.
+        taxa_servico = 1                # taxa de servico.
+        
+        fila1 = Fila(1)                 # fila 1, mais prioritaria (chegadas exogenas).
+        fila2 = Fila(2)                 # fila 2, menos prioritaria (nao ha chagadas exogenas).
+        eventos = []                    # lista de eventos.
 
-        fila1 = Fila(1)       # fila 1, mais prioritaria (chegadas exogenas)
-        fila2 = Fila(2)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
-        metricas = Metrica(n_rodadas, fregueses_por_rodada)
-        eventos = []                     # lista de eventos
+        total_fregueses_servidos = 0    # total de fregueses que passaram pelo sistema.
+        tempo = 0                       # tempo atual da simulacao.
+        rodada_atual = 0                # rodada da fase transiente.
+        fregues_executando = None       # inicializacao nula do fregues executando.
 
-        tempo = 0                        # tempo atual da simulacao
-        fregues_executando = None        # inicializacao nula do fregues executando
-        total_fregueses_servidos = 0     # total de fregueses que passaram pelo sistema
-        
-        rodada_atual = 0                     # rodada da fase transiente
-        
-        if n_transiente > 0:
-            id_proximo_fregues = -n_transiente   # id do proximo fregues a ser criado (fase transiente arbitraria)
-        else:
-            id_proximo_fregues = 0               # id do proximo fregues a ser criado 
-        
-        deterministico = 1               # Variável que vai servir de booleano para testar os casos deterministicos
+        metricas = Metrica(n_rodadas, fregueses_por_rodada) 
+        id_proximo_fregues = - n_transiente if n_transiente > 0 else id_proximo_fregues = 0   # id do proximo fregues a ser criado (fase transiente arbitraria)
+
+
+        ''' Casos DETERMINISTICOS '''
+        deterministico = False
         xs1 = [0]      
         xs2 = [0]
-        if deterministico:
-            # Caso de Interrupcao
-            chegadas = [1, 4]           # Vetor com o tempo de chegada de cada fregues   
-            xs1 = [1, 2]                # Vetor com o tempo de x1s de cada fregues
-            xs2 = [5, 2]                # Vetor com o tempo de x2s de cada fregues      
-
-            # Caso de Servidor Ocioso
-            # chegadas = [0, 4]
+        if deterministico:              # Caso de Interrupcao.
+            chegadas = [1, 4]           # Os vetores representam caracteristicas de todos os fregueses.
+            xs1 = [1, 2]                
+            xs2 = [5, 2]                   
+            # chegadas = [0, 4]         # Caso de Servidor Ocioso.
             # xs1 = [1, 1]
             # xs2 = [1, 2]   
-        
-        # O programa permanecera no loop enquanto nao forem executadas as n rodadas
-        while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:
             
+
+        ''' Execucao da SIMULACAO '''
+        while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:  # Loop de execucao sobre as RODADAS.
+            
+            # Tempo de chegada conforme sistema Deterministico:
             if deterministico:
-                if len(chegadas) > 0:
-                    tempo_ate_prox_chegada = chegadas.pop(0) - tempo       # Tempo de chegada conforme sistema deterministico
-                else:
-                    tempo_ate_prox_chegada = 10                            # Tempo coringa (grande) para caso nao haja mais chegadas
+                tempo_ate_prox_chegada = chegadas.pop(0)-tempo if len(chegadas) > 0 else tempo_ate_prox_chegada = 10
+            # Tempo de chegada conforme sistema Exponencial:
             else:
-                tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)   # Geracao de tempo de chegada com taxa lambd
+                tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)  
+            tempo += tempo_ate_prox_chegada
 
-            tempo += tempo_ate_prox_chegada    # Tempo do sistema somado do tempo que o prox fregues chegara
 
-            # se ainda tiver tempo livre ate a proxima chegada e algum fregues tiver executando, tratamos a sua execucao
-            while tempo_ate_prox_chegada > 0 and fregues_executando is not None:
-                # se o tempo restante de servico do fregues em execucao for menor do que a proxima chegada, tratamos sua execucao abaixo
-                if fregues_executando.tempo_restante <= tempo_ate_prox_chegada:
-                    # subtraimos do tempo ate a chegada do proximo fregues do tempo que o fregues que estava executando utilizou
-                    tempo_ate_prox_chegada -= fregues_executando.tempo_restante
+            # Loop de execucao enquanto ainda nao chegar um novo fregues
+            while tempo_ate_prox_chegada > 0 and fregues_executando is not None:    
+                
+                # Se a execucao do fregues acabar antes da proxima chegada.
+                if fregues_executando.tempo_restante <= tempo_ate_prox_chegada:     
+                    tempo_ate_prox_chegada -= fregues_executando.tempo_restante     # O tempo ate a prox chegada sera subtraido do tempo de servico do fregues em execucao
                     fregues_executando.tempo_restante = 0
                     tempo_atual = tempo - tempo_ate_prox_chegada
                     cor = fregues_executando.cor
-                    # geramos um evento de fim de servico
                     eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.FIM_SERVICO, fregues_executando.prioridade))
-                    # e agora verificamos se o fregues que estava executando era da fila 1, se sim, atualizamos a metrica W1 e T1, 
-                    # removemos ele da fila 1 e adicionamos na fila 2, gerando um evento de chegada 2
+                    
+                    # Atualizacao de metricas de acordo com a fila do fregues (1 ou 2).
+                    # E realizacao da troca de filas (para o fregues que executou em 1) ou evento de fim de execucao (fregues dafila 2)
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
                         metricas.acumula_w1(w1, cor)
@@ -87,44 +80,42 @@ class Simulador:
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
                         eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
-                    # se o fregues que terminou de executar era da fila 2, basta atualizarmos a metrica W2 e T2 e removermos ele da fila 2,
-                    # pois o mesmo agora saira do sistema, terminando sua execucao
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
                         metricas.acumula_w2(w2, cor)
                         metricas.acumula_t2(w2, cor)
                         if fregues_executando.cor > 0:
                             total_fregueses_servidos += 1
-                    
-                    # agora temos que colocar alguem em execucao se alguma das filas nao estiver vazia, lembrando que a prioridade
-                    # eh sempre da fila 1
-                    if fila1.tamanho() > 0:
+
+                    # Caso exista freguese na fila: coloca-lo em execucao (Prioridade para fila 1).
+                    if fila1.tamanho() > 0:                           
                         fregues_executando = fila1.proximo_fregues()
                     else:
                         if fila2.tamanho() > 0:
                             fregues_executando = fila2.proximo_fregues()
                         else:
                             fregues_executando = None
-                # como o tempo restente para a execucao eh maior do que o tempo ate a chegada de um proximo fregues, temos que tratar primeiro
-                # a chegada, pois ela influencia nas metricas
+                
+                
+                # Caso chegue um outro fregues no meio da execucao do fregues atual.
                 else:
                     fregues_executando.tempo_restante -= tempo_ate_prox_chegada
                     tempo_ate_prox_chegada = 0
 
+
+            # Tratando as rodadas.
             if id_proximo_fregues % fregueses_por_rodada == 0:
                 rodada_atual += 1            
-
             if rodada_atual > n_rodadas:
                 break
 
-            # agora tratamos a chegada de um novo fregues, criando um novo objeto Fregues, adicionando-o na fila 1, lancando um
-            # evento de chegada 1 e atualizando as metricas X1, X2, T1, T2, Nq1, Nq2, N1 e N2
-            
+            # Chega um novo fregues: entra na fila 1.
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual, xs1[0], xs2[0])
             if deterministico:
-                del xs1[0]          # Ja foi alocado o Xs1 do proximo fregues (do caso deterministico)
-                del xs2[0]          # Ja foi alocado o Xs2 do proximo fregues (do caso deterministico)
+                del xs1[0]
+                del xs2[0]
             
+            # Atualizacao de Metricas.
             metricas.acumula_x1(fregues.tempo_servico1, rodada_atual)
             metricas.acumula_t1(fregues.tempo_servico1, rodada_atual)
             metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
@@ -136,32 +127,32 @@ class Simulador:
 
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
-            # se nao tem ninguem executando, esse fregues ja vai ser servido diretamente
+            # Rotina de verificacao de quem deve executar.
             if fregues_executando is None:
                 fregues_executando = fregues
-            else:
-                # se existe algum fregues de prioridade 2 executando, esse novo fregues tera a prioridade de execucao
+            else:                                               # Interrupcao, Novo fregues executa.
                 if fregues_executando.prioridade == 2:
                     fila2.volta_para_fila(fregues_executando)
                     fregues_executando = fregues
                     metricas.acumula_ns2(1, rodada_atual)
                     metricas.acumula_n2(1, rodada_atual)
-                # se existe algum fregues de prioridade 1 executando, o novo fregues eh somente adicionado na fila 1
-                else:
+                else:                                           # Novo fregues para fila 1.
                     fila1.adiciona(fregues)
                     metricas.acumula_ns1(1, rodada_atual)
                     metricas.acumula_n1(1, rodada_atual)
-
-            # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
 
-        #imprimindo parametros de entrada
+
+        # Imprecao dos parametros de entrada.
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
         tabela_parametros.add_row([n_rodadas, fregueses_por_rodada, n_transiente, rho, lambd])
         print(tabela_parametros, "\n")
 
-        # calculando e imprimindo as metricas
+        # Calculo e imprecao das metricas.
         metricas.calcula(deterministico)
+
+
+
 
 def main(argv):
     """ Funcao main
@@ -175,7 +166,6 @@ def main(argv):
     fregueses_por_rodada = int(argv[2])
     n_transiente = int(argv[3])
     rho = float(argv[4])
-
     inicio = datetime.now()
 
     Simulador().executar(n_rodadas, fregueses_por_rodada, rho, n_transiente)
