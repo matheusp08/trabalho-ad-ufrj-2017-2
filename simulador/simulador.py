@@ -5,7 +5,7 @@ from datetime import datetime
 from fila import Fila
 from fregues import Fregues
 from utils import Utils
-# from evento import Evento, TipoEvento
+from evento import Evento, TipoEvento
 from metrica import Metrica
 from prettytable import PrettyTable
 
@@ -27,7 +27,7 @@ class Simulador:
         fila1 = Fila(1)       # fila 1, mais prioritaria (chegadas exogenas)
         fila2 = Fila(2)       # fila 2, menos prioritaria (nao ha chagadas exogenas)
         metricas = Metrica(n_rodadas, fregueses_por_rodada)
-        # eventos = []                     # lista de eventos
+        eventos = []                     # lista de eventos
 
         tempo = 0                        # tempo atual da simulacao
         fregues_executando = None        # inicializacao nula do fregues executando
@@ -57,24 +57,22 @@ class Simulador:
                     tempo_atual = tempo - tempo_ate_prox_chegada
                     cor = fregues_executando.cor
                     # geramos um evento de fim de servico
-                    # eventos.append(
-                        # Evento(tempo_atual,
-                            # fregues_executando.fregues_id,
-                            # TipoEvento.FIM_SERVICO,
-                            # fregues_executando.prioridade))
-                    # e agora verificamos se o fregues que estava executando era da fila 1, se sim, atualizamos a metrica W1, 
+                    eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.FIM_SERVICO, fregues_executando.prioridade))
+                    # e agora verificamos se o fregues que estava executando era da fila 1, se sim, atualizamos a metrica W1 e T1, 
                     # removemos ele da fila 1 e adicionamos na fila 2, gerando um evento de chegada 2
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
                         metricas.acumula_w1(w1, cor)
+                        metricas.acumula_t1(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
-                        # eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
-                    # se o fregues que terminou de executar era da fila 2, basta atualizarmos a metrica W2 e removermos ele da fila 2,
+                        eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
+                    # se o fregues que terminou de executar era da fila 2, basta atualizarmos a metrica W2 e T2 e removermos ele da fila 2,
                     # pois o mesmo agora saira do sistema, terminando sua execucao
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
                         metricas.acumula_w2(w2, cor)
+                        metricas.acumula_t2(w2, cor)
                         if fregues_executando.cor > 0:
                             total_fregueses_servidos += 1
                     
@@ -100,15 +98,20 @@ class Simulador:
                 break
 
             # agora tratamos a chegada de um novo fregues, criando um novo objeto Fregues, adicionando-o na fila 1, lancando um
-            # evento de chegada 1 e atualizando as metricas X1, X2, Nq1 e Nq2
+            # evento de chegada 1 e atualizando as metricas X1, X2, T1, T2, Nq1, Nq2, N1 e N2
+            
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
+            
             metricas.acumula_x1(fregues.tempo_servico1, rodada_atual)
-            metricas.acumula_x2(fregues.tempo_servico2, rodada_atual)
-
+            metricas.acumula_t1(fregues.tempo_servico1, rodada_atual)
             metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
+            metricas.acumula_n1(fila1.tamanho(), rodada_atual)
+            metricas.acumula_x2(fregues.tempo_servico2, rodada_atual)
+            metricas.acumula_t2(fregues.tempo_servico2, rodada_atual)
             metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
+            metricas.acumula_n2(fila2.tamanho(), rodada_atual)
 
-            # eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+            eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
             # se nao tem ninguem executando, esse fregues ja vai ser servido diretamente
             if fregues_executando is None:
@@ -119,10 +122,13 @@ class Simulador:
                     fila2.volta_para_fila(fregues_executando)
                     fregues_executando = fregues
                     metricas.acumula_ns2(1, rodada_atual)
+                    metricas.acumula_n2(1, rodada_atual)
                 # se existe algum fregues de prioridade 1 executando, o novo fregues eh somente adicionado na fila 1
                 else:
                     fila1.adiciona(fregues)
                     metricas.acumula_ns1(1, rodada_atual)
+                    metricas.acumula_n1(1, rodada_atual)
+
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
 
