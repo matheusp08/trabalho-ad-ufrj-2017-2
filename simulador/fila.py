@@ -21,19 +21,12 @@ class Fila:
         """
         self.fregueses = [fregues] + self.fregueses
 
-    def remove(self):
-        """ Funcao para remover o primeiro fregues da fila
-        """
-        self.fregueses = self.fregueses[1:]
-
     def tamanho(self):
         """ Funcao para retornar o tamanho da fila
         """
         return len(self.fregueses)
 
     def proximo_fregues(self):
-        """ Funcao para retornar o primeiro fregues da fila
+        """ Funcao para retornar o primeiro fregues da fila, removendo-o da mesma
         """
-        proximo_fregues = self.fregueses[0]
-        self.remove()
-        return proximo_fregues
+        return self.fregueses.pop(0)

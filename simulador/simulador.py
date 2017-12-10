@@ -81,27 +81,29 @@ class Simulador:
                     # E realizacao da troca de filas (para o fregues que executou em 1) ou evento de fim de execucao (fregues dafila 2)
                     if fregues_executando.prioridade == 1:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
-                        metricas.acumula_w1(w1, cor)
-                        metricas.acumula_t1(w1, cor)
+                        if cor <= n_rodadas: # so calcula metricas dos fregueses ate n_rodadas
+                            metricas.acumula_w1(w1, cor)
+                            metricas.acumula_t1(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
                         eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
-                        metricas.acumula_w2(w2, cor)
-                        metricas.acumula_t2(w2, cor)
-                        if fregues_executando.cor > 0:
+                        if cor <= n_rodadas: # so calcula metricas dos fregueses ate n_rodadas
+                            metricas.acumula_w2(w2, cor)
+                            metricas.acumula_t2(w2, cor)
+                        # if para garantir que os fregueses das rodadas foram os servidos
+                        if fregues_executando.cor > 0 and fregues_executando.cor <= n_rodadas:
                             total_fregueses_servidos += 1
 
                     # Caso exista freguese na fila: coloca-lo em execucao (Prioridade para fila 1).
-                    if fila1.tamanho() > 0:                           
+                    if fila1.tamanho() > 0:
                         fregues_executando = fila1.proximo_fregues()
                     else:
                         if fila2.tamanho() > 0:
                             fregues_executando = fila2.proximo_fregues()
                         else:
                             fregues_executando = None
-                
                 
                 # Caso chegue um outro fregues no meio da execucao do fregues atual.
                 else:
@@ -111,9 +113,7 @@ class Simulador:
 
             # Tratando as rodadas.
             if id_proximo_fregues % fregueses_por_rodada == 0:
-                rodada_atual += 1            
-            if rodada_atual > n_rodadas:
-                break
+                rodada_atual += 1
 
             # Chega um novo fregues: entra na fila 1.
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual, xs1[0], xs2[0])
@@ -122,14 +122,15 @@ class Simulador:
                 del xs2[0]
             
             # Atualizacao de Metricas.
-            metricas.acumula_x1(fregues.tempo_servico1, rodada_atual)
-            metricas.acumula_t1(fregues.tempo_servico1, rodada_atual)
-            metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
-            metricas.acumula_n1(fila1.tamanho(), rodada_atual)
-            metricas.acumula_x2(fregues.tempo_servico2, rodada_atual)
-            metricas.acumula_t2(fregues.tempo_servico2, rodada_atual)
-            metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
-            metricas.acumula_n2(fila2.tamanho(), rodada_atual)
+            if rodada_atual <= n_rodadas:
+                metricas.acumula_x1(fregues.tempo_servico1, rodada_atual)
+                metricas.acumula_t1(fregues.tempo_servico1, rodada_atual)
+                metricas.acumula_nq1(fila1.tamanho(), rodada_atual)
+                metricas.acumula_n1(fila1.tamanho(), rodada_atual)
+                metricas.acumula_x2(fregues.tempo_servico2, rodada_atual)
+                metricas.acumula_t2(fregues.tempo_servico2, rodada_atual)
+                metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
+                metricas.acumula_n2(fila2.tamanho(), rodada_atual)
 
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
@@ -140,14 +141,15 @@ class Simulador:
                 if fregues_executando.prioridade == 2:
                     fila2.volta_para_fila(fregues_executando)
                     fregues_executando = fregues
-                    metricas.acumula_ns2(1, rodada_atual)
-                    metricas.acumula_n2(1, rodada_atual)
+                    if rodada_atual <= n_rodadas:
+                        metricas.acumula_ns2(1, rodada_atual)
+                        metricas.acumula_n2(1, rodada_atual)
                 else:                                           # Novo fregues para fila 1.
                     fila1.adiciona(fregues)
-                    metricas.acumula_ns1(1, rodada_atual)
-                    metricas.acumula_n1(1, rodada_atual)
+                    if rodada_atual <= n_rodadas:
+                        metricas.acumula_ns1(1, rodada_atual)
+                        metricas.acumula_n1(1, rodada_atual)
             id_proximo_fregues += 1
-
 
         # Imprecao dos parametros de entrada.
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
@@ -157,13 +159,9 @@ class Simulador:
         # Calculo e imprecao das metricas.
         metricas.calcula(deterministico)
 
-
-
-
 def main(argv):
     """ Funcao main
     """
-
     if len(argv) < 5:
         print("Execucao deve ser: python3 simulador.py numero_rodadas fregueses_por_rodada fase_transiente rho")
         sys.exit()
