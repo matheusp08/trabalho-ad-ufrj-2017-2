@@ -426,21 +426,21 @@ class Metrica:
 
             # calculando a precisao de cada metrica
             # DIVISAO POR 0
-            self.precisao_x1 = round((self.ic_x1 / self.x1_med_total) * 100, 2)
-            self.precisao_w1 = round((self.ic_w1 / self.w1_med_total) * 100, 2)
-            self.precisao_nq1 = round((self.ic_nq1 / self.nq1_med_total) * 100, 2)
-            self.precisao_ns1 = round((self.ic_ns1 / self.ns1_med_total) * 100, 2)
-            self.precisao_n1 = round((self.ic_n1 / self.n1_med_total) * 100, 2)
-            self.precisao_t1 = round((self.ic_t1 / self.t1_med_total) * 100, 2)
-            self.precisao_w1_med = round((self.ic_w1_med / self.var_w1_med_total) * 100, 2)
+            self.precisao_x1 = 0 if self.x1_med_total == 0 else round((self.ic_x1 / self.x1_med_total) * 100, 2)
+            self.precisao_w1 = 0 if self.w1_med_total == 0 else round((self.ic_w1 / self.w1_med_total) * 100, 2)
+            self.precisao_nq1 = 0 if self.nq1_med_total == 0 else round((self.ic_nq1 / self.nq1_med_total) * 100, 2)
+            self.precisao_ns1 = 0 if self.ns1_med_total == 0 else round((self.ic_ns1 / self.ns1_med_total) * 100, 2)
+            self.precisao_n1 = 0 if self.n1_med_total == 0 else round((self.ic_n1 / self.n1_med_total) * 100, 2)
+            self.precisao_t1 = 0 if self.t1_med_total == 0 else round((self.ic_t1 / self.t1_med_total) * 100, 2)
+            self.precisao_w1_med = 0 if self.var_w1_med_total == 0 else round((self.ic_w1_med / self.var_w1_med_total) * 100, 2)
 
-            self.precisao_x2 = round((self.ic_x2 / self.x2_med_total) * 100, 2)
-            self.precisao_w2 = round((self.ic_w2 / self.w2_med_total) * 100, 2)
-            self.precisao_nq2 = round((self.ic_nq2 / self.nq2_med_total) * 100, 2)
-            self.precisao_ns2 = round((self.ic_ns2 / self.ns2_med_total) * 100, 2)
-            self.precisao_n2 = round((self.ic_n2 / self.n2_med_total) * 100, 2)
-            self.precisao_t2 = round((self.ic_t2 / self.t2_med_total) * 100, 2)
-            self.precisao_w2_med = round((self.ic_w2_med / self.var_w2_med_total) * 100, 2)
+            self.precisao_x2 = 0 if self.x2_med_total == 0 else round((self.ic_x2 / self.x2_med_total) * 100, 2)
+            self.precisao_w2 = 0 if self.w2_med_total == 0 else round((self.ic_w2 / self.w2_med_total) * 100, 2)
+            self.precisao_nq2 = 0 if self.nq2_med_total == 0 else round((self.ic_nq2 / self.nq2_med_total) * 100, 2)
+            self.precisao_ns2 = 0 if self.ns2_med_total == 0 else round((self.ic_ns2 / self.ns2_med_total) * 100, 2)
+            self.precisao_n2 = 0 if self.n2_med_total == 0 else round((self.ic_n2 / self.n2_med_total) * 100, 2)
+            self.precisao_t2 = 0 if self.t2_med_total == 0 else round((self.ic_t2 / self.t2_med_total) * 100, 2)
+            self.precisao_w2_med = 0 if self.var_w2_med_total == 0 else round((self.ic_w2_med / self.var_w2_med_total) * 100, 2)
 
             # calculando o intervalo de confianca de V[W1] e V[W2] usando chi-squared
             # eh usada como variancia a media da variancia de todas as rodadas, e n como numero de fregueses por rodada
