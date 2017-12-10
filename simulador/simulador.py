@@ -131,14 +131,8 @@ class Simulador:
         tabela_parametros.add_row([n_rodadas, fregueses_por_rodada, n_transiente, rho, lambd])
         print(tabela_parametros, "\n")
 
-        # calculando e imprimindo as esperancas
-        metricas.calcula_esp()
-
-        # calculando e imprimindo as variancias
-        # metricas.calcula_var()
-
-        # calcula e imprime os intervalos de confianca
-        # metricas.calcula_ic()
+        # calculando e imprimindo as metricas
+        metricas.calcula()
 
 def main(argv):
     """ Funcao main

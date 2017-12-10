@@ -31,13 +31,16 @@ class Metrica:
         self.n1_med_total = 0
         self.t1_med_total = 0
 
-        # variavel
-        self.var_x1 = [0] * (n_rodadas + 1)
-        self.var_w1 = [0] * (n_rodadas + 1)
-        self.var_nq1 = [0] * (n_rodadas +1)
-        self.var_ns1 = [0] * (n_rodadas +1)
+        # variancia das metricas por rodada, considerando (amostra_rodada - media_rodada) / (total amostras - 1)
+        self.var_x1_med_rodada = [0] * (n_rodadas + 1)
+        self.var_w1_med_rodada = [0] * (n_rodadas + 1)
+        self.var_nq1_med_rodada = [0] * (n_rodadas +1)
+        self.var_ns1_med_rodada = [0] * (n_rodadas +1)
 
-        # variavel
+        # media total das variancias
+        self.var_w1_med_total = 0
+
+        # desvios padrao
         self.dp_x1 = [0] * (n_rodadas + 1)
         self.dp_w1 = [0] * (n_rodadas + 1)
         self.dp_nq1 = [0] * (n_rodadas + 1)
@@ -66,11 +69,16 @@ class Metrica:
         self.n2_med_total = 0
         self.t2_med_total = 0
 
-        self.var_x2 = [0] * (n_rodadas + 1)
-        self.var_w2 = [0] * (n_rodadas + 1)
-        self.var_nq2 = [0] * (n_rodadas +1)
-        self.var_ns2 = [0] * (n_rodadas +1)
+        # variancia das metricas por rodada, considerando (amostra_rodada - media_rodada) / (total amostras - 1)
+        self.var_x2_med_rodada = [0] * (n_rodadas + 1)
+        self.var_w2_med_rodada = [0] * (n_rodadas + 1)
+        self.var_nq2_med_rodada = [0] * (n_rodadas +1)
+        self.var_ns2_med_rodada = [0] * (n_rodadas +1)
 
+        # media total das variancias
+        self.var_w2_med_total = 0
+
+        # desvios padrao
         self.dp_x2 = [0] * (n_rodadas + 1)
         self.dp_w2 = [0] * (n_rodadas + 1)
         self.dp_nq2 = [0] * (n_rodadas + 1)
@@ -119,19 +127,21 @@ class Metrica:
         """
         self.w2[rodada].append(w2)
 
-    def calcula_esp(self):
+    def calcula(self):
         """ Calcula os valores das esperancas
         """
-        # criando header da tabela de esperancas
-        tabela_esperancas = PrettyTable(["Rodadas",
-                                         "E[T1]",
-                                         "E[W1]",
-                                         "E[N1]",
-                                         "E[Nq1]",
-                                         "E[T2]",
-                                         "E[W2]",
-                                         "E[N2]",
-                                         "E[Nq2]"])
+        # criando header da tabela
+        tabela = PrettyTable(["Rodadas",
+                              "E[T1]",
+                              "E[W1]",
+                              "E[N1]",
+                              "E[Nq1]",
+                              "E[T2]",
+                              "E[W2]",
+                              "E[N2]",
+                              "E[Nq2]",
+                              "Var[W1]",
+                              "Var[W2]"])
 
         for index in range(1, self.n_rodadas+1):
             # calculando a esperanca das metricas da fila 1
@@ -150,15 +160,25 @@ class Metrica:
             self.n2_med_rodada[index] = self.nq2_med_rodada[index] + self.ns2_med_rodada[index]
             self.t2_med_rodada[index] = self.w2_med_rodada[index] + self.x2_med_rodada[index]
 
-            tabela_esperancas.add_row(["rodada_" + str(index),
-                                       round(self.t1_med_rodada[index], 6),
-                                       round(self.w1_med_rodada[index], 6),
-                                       round(self.n1_med_rodada[index], 6),
-                                       round(self.nq1_med_rodada[index], 6),
-                                       round(self.t2_med_rodada[index], 6),
-                                       round(self.w2_med_rodada[index], 6),
-                                       round(self.n2_med_rodada[index], 6),
-                                       round(self.nq2_med_rodada[index], 6)])
+            # calculo de Var[W1] e Var[W2] para exibir na tabela
+            for amostra in range(len(self.w1[index])):
+                self.var_w1_med_rodada[index] += (self.w1[index][amostra] - self.w1_med_rodada[index]) ** 2
+                self.var_w2_med_rodada[index] += (self.w2[index][amostra] - self.w2_med_rodada[index]) ** 2
+
+            self.var_w1_med_rodada[index] /= (len(self.w1[index]) - 1)
+            self.var_w2_med_rodada[index] /= (len(self.w2[index]) - 1)
+
+            tabela.add_row(["rodada_" + str(index),
+                            round(self.t1_med_rodada[index], 6),
+                            round(self.w1_med_rodada[index], 6),
+                            round(self.n1_med_rodada[index], 6),
+                            round(self.nq1_med_rodada[index], 6),
+                            round(self.t2_med_rodada[index], 6),
+                            round(self.w2_med_rodada[index], 6),
+                            round(self.n2_med_rodada[index], 6),
+                            round(self.nq2_med_rodada[index], 6),
+                            round(self.var_w1_med_rodada[index], 6),
+                            round(self.var_w2_med_rodada[index], 6)])
 
             # acumulando medias totais
             self.x1_med_total += self.x1_med_rodada[index]
@@ -169,6 +189,8 @@ class Metrica:
             self.w2_med_total += self.w2_med_rodada[index]
             self.nq2_med_total += self.nq2_med_rodada[index]
             self.ns2_med_total += self.ns2_med_rodada[index]
+            self.var_w1_med_total += self.var_w1_med_rodada[index]
+            self.var_w2_med_total += self.var_w2_med_rodada[index]
 
         # dividindo medias acumuladas pelo total de rodadas e enfim, calculando a media total de cada metrica
         self.x1_med_total /= self.n_rodadas
@@ -183,18 +205,22 @@ class Metrica:
         self.ns2_med_total /= self.n_rodadas
         self.n2_med_total = self.nq2_med_total + self.ns2_med_total
         self.t2_med_total = self.w2_med_total + self.x2_med_total
+        self.var_w1_med_total /= self.n_rodadas
+        self.var_w2_med_total /= self.n_rodadas
 
-        tabela_esperancas.add_row(["Media",
-                                   round(self.t1_med_total, 6),
-                                   round(self.w1_med_total, 6),
-                                   round(self.n1_med_total, 6),
-                                   round(self.nq1_med_total, 6),
-                                   round(self.t2_med_total, 6),
-                                   round(self.w2_med_total, 6),
-                                   round(self.n2_med_total, 6),
-                                   round(self.nq2_med_total, 6)])
+        tabela.add_row(["Media",
+                        round(self.t1_med_total, 6),
+                        round(self.w1_med_total, 6),
+                        round(self.n1_med_total, 6),
+                        round(self.nq1_med_total, 6),
+                        round(self.t2_med_total, 6),
+                        round(self.w2_med_total, 6),
+                        round(self.n2_med_total, 6),
+                        round(self.nq2_med_total, 6),
+                        round(self.var_w1_med_total, 6),
+                        round(self.var_w2_med_total, 6)])
 
-        print(tabela_esperancas, "\n")
+        print(tabela, "\n")
 
     # def calcula_var(self):
     #     ''' Calcula os valores das variancias e desvios padroes de w1 e w2
