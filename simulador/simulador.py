@@ -40,7 +40,7 @@ class Simulador:
         else:
             id_proximo_fregues = 0               # id do proximo fregues a ser criado 
         
-        deterministico = 0               # Variável que vai servir de booleano para testar os casos deterministicos
+        deterministico = False               # Variável que vai servir de booleano para testar os casos deterministicos
         xs1 = [0]      
         xs2 = [0]
         if deterministico:
@@ -155,13 +155,13 @@ class Simulador:
         print(tabela_parametros, "\n")
 
         # calculando e imprimindo as metricas
-        metricas.calcula()
+        metricas.calcula(deterministico)
 
 def main(argv):
     """ Funcao main
     """
 
-    if len(argv) < 4:
+    if len(argv) < 5:
         print("Execucao deve ser: python3 simulador.py numero_rodadas fregueses_por_rodada fase_transiente rho")
         sys.exit()
 

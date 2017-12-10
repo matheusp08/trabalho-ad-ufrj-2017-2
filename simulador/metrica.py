@@ -215,7 +215,7 @@ class Metrica:
         """
         self.t2[rodada].append(t2)
 
-    def calcula(self):
+    def calcula(self, is_deterministico):
         """ Calcula os valores das esperancas
         """
         # criando header da tabela
@@ -326,7 +326,8 @@ class Metrica:
 
         print(tabela, "\n")
 
-        self.calcula_ic()
+        if not is_deterministico:
+            self.calcula_ic()
 
     def calcula_variancias(self):
         """ Funcao para calcular a variancia das medias das rodadas (amostra = media da rodada)
