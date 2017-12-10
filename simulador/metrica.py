@@ -253,13 +253,19 @@ class Metrica:
             self.t2_med_rodada[index] = sum(self.t2[index])/self.fregueses_por_rodada
 
             # calculo de Var[W1] e Var[W2] para exibir na tabela
-            for amostra in range(len(self.w1[index])):
-                self.var_w1_med_rodada[index] += (self.w1[index][amostra] - self.w1_med_rodada[index]) ** 2
-            for amostra in range(len(self.w2[index])):
-                self.var_w2_med_rodada[index] += (self.w2[index][amostra] - self.w2_med_rodada[index]) ** 2
+            if len(self.w1[index]) == 1:
+                self.var_w1_med_rodada[index] = 0
+            else:
+                for amostra in range(len(self.w1[index])):
+                    self.var_w1_med_rodada[index] += (self.w1[index][amostra] - self.w1_med_rodada[index]) ** 2
+                self.var_w1_med_rodada[index] /= (len(self.w1[index]) - 1)
 
-            self.var_w1_med_rodada[index] /= (len(self.w1[index]) - 1)
-            self.var_w2_med_rodada[index] /= (len(self.w2[index]) - 1)
+            if len(self.w2[index]) == 1:
+                self.var_w2_med_rodada[index] = 0
+            else:
+                for amostra2 in range(len(self.w2[index])):
+                    self.var_w2_med_rodada[index] += (self.w2[index][amostra2] - self.w2_med_rodada[index]) ** 2
+                self.var_w2_med_rodada[index] /= (len(self.w2[index]) - 1)
 
             tabela.add_row(["rodada_" + str(index),
                             round(self.t1_med_rodada[index], 6),
