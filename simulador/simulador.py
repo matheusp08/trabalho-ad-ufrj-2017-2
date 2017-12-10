@@ -32,7 +32,10 @@ class Simulador:
         fregues_executando = None       # inicializacao nula do fregues executando.
 
         metricas = Metrica(n_rodadas, fregueses_por_rodada) 
-        id_proximo_fregues = - n_transiente if n_transiente > 0 else id_proximo_fregues = 0   # id do proximo fregues a ser criado (fase transiente arbitraria)
+        if n_transiente > 0:
+            id_proximo_fregues = - n_transiente
+        else:
+            id_proximo_fregues = 0   # id do proximo fregues a ser criado (fase transiente arbitraria)
 
 
         ''' Casos DETERMINISTICOS '''
@@ -53,7 +56,10 @@ class Simulador:
             
             # Tempo de chegada conforme sistema Deterministico:
             if deterministico:
-                tempo_ate_prox_chegada = chegadas.pop(0)-tempo if len(chegadas) > 0 else tempo_ate_prox_chegada = 10
+                if len(chegadas) > 0:
+                    tempo_ate_prox_chegada = chegadas.pop(0)-tempo
+                else:
+                    tempo_ate_prox_chegada = 10
             # Tempo de chegada conforme sistema Exponencial:
             else:
                 tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)  
