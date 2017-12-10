@@ -40,13 +40,19 @@ class Simulador:
         else:
             id_proximo_fregues = 0               # id do proximo fregues a ser criado 
         
-        deterministico = False               # Variável que vai servir de booleano para testar os casos deterministicos
+        deterministico = 1               # Variável que vai servir de booleano para testar os casos deterministicos
         xs1 = [0]      
         xs2 = [0]
         if deterministico:
+            # Caso de Interrupcao
             chegadas = [1, 4]           # Vetor com o tempo de chegada de cada fregues   
             xs1 = [1, 2]                # Vetor com o tempo de x1s de cada fregues
-            xs2 = [5, 2]                # Vetor com o tempo de x2s de cada fregues         
+            xs2 = [5, 2]                # Vetor com o tempo de x2s de cada fregues      
+
+            # Caso de Servidor Ocioso
+            # chegadas = [0, 4]
+            # xs1 = [1, 1]
+            # xs2 = [1, 2]   
         
         # O programa permanecera no loop enquanto nao forem executadas as n rodadas
         while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:

@@ -424,7 +424,8 @@ class Metrica:
         self.ic_t2 = t_student * self.dp_t2 / raiz_n_rodadas
         self.ic_w2_med = t_student * self.dp_w2_med / raiz_n_rodadas
 
-        # calculando a precisao de cada metrica - ESSE DIVISOR PODE SER 0? DIVISAO POR 0
+        # calculando a precisao de cada metrica
+        # DIVISAO POR 0
         self.precisao_x1 = round((self.ic_x1 / self.x1_med_total) * 100, 2)
         self.precisao_w1 = round((self.ic_w1 / self.w1_med_total) * 100, 2)
         self.precisao_nq1 = round((self.ic_nq1 / self.nq1_med_total) * 100, 2)
