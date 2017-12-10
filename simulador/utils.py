@@ -32,9 +32,3 @@ class Utils:
                 numero aleatorio seguindo uma taxa exponencial 
         """
         return nprand.exponential(taxa)
-
-    @staticmethod
-    def get_distribuicao_t_student():
-        """ Funcao para retornar o valor da t-student para o intervalo de confianca 95%
-        """
-        return 1.96

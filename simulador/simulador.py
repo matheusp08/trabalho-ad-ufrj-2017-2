@@ -94,7 +94,6 @@ class Simulador:
                     tempo_ate_prox_chegada = 0
 
             if id_proximo_fregues % fregueses_por_rodada == 0:
-                #print("Fim da rodada", rodada_atual)
                 rodada_atual += 1            
 
             if rodada_atual > n_rodadas:
@@ -127,28 +126,26 @@ class Simulador:
             # o id do proximo fregues eh entao acrescido de 1
             id_proximo_fregues += 1
 
-        #print("Calculando e imprimindo metricas")
-        
         #imprimindo parametros de entrada
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
         tabela_parametros.add_row([n_rodadas, fregueses_por_rodada, n_transiente, rho, lambd])
-        print(tabela_parametros)
+        print(tabela_parametros, "\n")
 
         # calculando e imprimindo as esperancas
         metricas.calcula_esp()
 
         # calculando e imprimindo as variancias
-        metricas.calcula_var()
+        # metricas.calcula_var()
 
         # calcula e imprime os intervalos de confianca
-        metricas.calcula_ic()
+        # metricas.calcula_ic()
 
 def main(argv):
     """ Funcao main
     """
 
     if len(argv) < 4:
-        print("Execucao deve ser: python3 simulador.py numero_rodadas fregueses_por_rodada rho")
+        print("Execucao deve ser: python3 simulador.py numero_rodadas fregueses_por_rodada fase_transiente rho")
         sys.exit()
 
     n_rodadas = int(argv[1])
