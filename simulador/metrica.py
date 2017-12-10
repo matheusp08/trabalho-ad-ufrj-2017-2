@@ -255,6 +255,7 @@ class Metrica:
             # calculo de Var[W1] e Var[W2] para exibir na tabela
             for amostra in range(len(self.w1[index])):
                 self.var_w1_med_rodada[index] += (self.w1[index][amostra] - self.w1_med_rodada[index]) ** 2
+            for amostra in range(len(self.w2[index])):
                 self.var_w2_med_rodada[index] += (self.w2[index][amostra] - self.w2_med_rodada[index]) ** 2
 
             self.var_w1_med_rodada[index] /= (len(self.w1[index]) - 1)
