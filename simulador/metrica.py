@@ -237,20 +237,24 @@ class Metrica:
 
         for index in range(1, self.n_rodadas+1):
             # calculando a esperanca das metricas da fila 1
-            self.x1_med_rodada[index] = sum(self.x1[index])/self.fregueses_por_rodada
-            self.w1_med_rodada[index] = sum(self.w1[index])/self.fregueses_por_rodada
-            self.nq1_med_rodada[index] = sum(self.nq1[index])/self.fregueses_por_rodada
-            self.ns1_med_rodada[index] = sum(self.ns1[index])/self.fregueses_por_rodada
-            self.n1_med_rodada[index] = sum(self.n1[index])/self.fregueses_por_rodada
-            self.t1_med_rodada[index] = sum(self.t1[index])/self.fregueses_por_rodada
+            # print("n fregueses por rodada: ",  self.fregueses_por_rodada, ". E len w1: ", len(self.w1[index]))
+            if len(self.w1[index]) > 0:
+                self.x1_med_rodada[index] = sum(self.x1[index])/len(self.w1[index])
+                self.w1_med_rodada[index] = sum(self.w1[index])/len(self.w1[index])
+                self.nq1_med_rodada[index] = sum(self.nq1[index])/len(self.w1[index])
+                self.ns1_med_rodada[index] = sum(self.ns1[index])/len(self.w1[index])
+                self.n1_med_rodada[index] = sum(self.n1[index])/len(self.w1[index])
+                self.t1_med_rodada[index] = sum(self.t1[index])/len(self.w1[index])
 
             # calculando a esperanca das metricas da fila 2
-            self.x2_med_rodada[index] = sum(self.x2[index])/self.fregueses_por_rodada
-            self.w2_med_rodada[index] = sum(self.w2[index])/self.fregueses_por_rodada
-            self.nq2_med_rodada[index] = sum(self.nq2[index])/self.fregueses_por_rodada
-            self.ns2_med_rodada[index] = sum(self.ns2[index])/self.fregueses_por_rodada
-            self.n2_med_rodada[index] = sum(self.n2[index])/self.fregueses_por_rodada
-            self.t2_med_rodada[index] = sum(self.t2[index])/self.fregueses_por_rodada
+            # print("n fregueses por rodada: ",  self.fregueses_por_rodada, ". E len w2: ", len(self.w2[index]))
+            if len(self.w2[index]) > 0:
+                self.x2_med_rodada[index] = sum(self.x2[index])/len(self.w2[index])
+                self.w2_med_rodada[index] = sum(self.w2[index])/len(self.w2[index])
+                self.nq2_med_rodada[index] = sum(self.nq2[index])/len(self.w2[index])
+                self.ns2_med_rodada[index] = sum(self.ns2[index])/len(self.w2[index])
+                self.n2_med_rodada[index] = sum(self.n2[index])/len(self.w2[index])
+                self.t2_med_rodada[index] = sum(self.t2[index])/len(self.w2[index])
 
             # calculo de Var[W1] e Var[W2] para exibir na tabela
             if len(self.w1[index]) == 1:
@@ -420,7 +424,7 @@ class Metrica:
         self.ic_t2 = t_student * self.dp_t2 / raiz_n_rodadas
         self.ic_w2_med = t_student * self.dp_w2_med / raiz_n_rodadas
 
-        # calculando a precisao de cada metrica
+        # calculando a precisao de cada metrica - ESSE DIVISOR PODE SER 0? DIVISAO POR 0
         self.precisao_x1 = round((self.ic_x1 / self.x1_med_total) * 100, 2)
         self.precisao_w1 = round((self.ic_w1 / self.w1_med_total) * 100, 2)
         self.precisao_nq1 = round((self.ic_nq1 / self.nq1_med_total) * 100, 2)
