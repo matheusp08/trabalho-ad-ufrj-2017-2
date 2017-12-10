@@ -2,6 +2,7 @@
 """
 import math
 import numpy as np
+from scipy.stats import chi2
 from prettytable import PrettyTable
 
 class Metrica:
@@ -66,6 +67,15 @@ class Metrica:
         self.ic_t1 = 0
         self.ic_w1_med = 0
 
+        # precisao do ic
+        self.precisao_x1 = 0
+        self.precisao_w1 = 0
+        self.precisao_nq1 = 0
+        self.precisao_ns1 = 0
+        self.precisao_n1 = 0
+        self.precisao_t1 = 0
+        self.precisao_w1_med = 0
+
         # FILA 2
         # Matriz com a amostra de cada metrica por rodada
         self.x2 = [[] for _ in range(n_rodadas+1)]
@@ -122,7 +132,25 @@ class Metrica:
         self.ic_ns2 = 0
         self.ic_n2 = 0
         self.ic_t2 = 0
-        self.ic_w2_med = 0   
+        self.ic_w2_med = 0
+
+        # precisao do ic
+        self.precisao_x2 = 0
+        self.precisao_w2 = 0
+        self.precisao_nq2 = 0
+        self.precisao_ns2 = 0
+        self.precisao_n2 = 0
+        self.precisao_t2 = 0
+        self.precisao_w2_med = 0
+
+        # ic utilizando chi-square
+        self.chi2_inferior = 0
+        self.chi2_superior = 0
+        self.w1_chi2_inferior = 0
+        self.w1_chi2_superior = 0
+        self.w2_chi2_inferior = 0
+        self.w2_chi2_superior = 0
+        self.precisao_chi2 = 0
 
         self.fregueses_por_rodada = fregueses_por_rodada
         self.n_rodadas = n_rodadas
@@ -327,7 +355,7 @@ class Metrica:
         self.var_ns1 /= (self.n_rodadas - 1)
         self.var_n1 /= (self.n_rodadas - 1)
         self.var_t1 /= (self.n_rodadas - 1)
-        self.var_w2_med /= (self.n_rodadas - 1)
+        self.var_w1_med /= (self.n_rodadas - 1)
 
         self.var_x2 /= (self.n_rodadas - 1)
         self.var_w2 /= (self.n_rodadas - 1)
@@ -366,6 +394,7 @@ class Metrica:
         raiz_n_rodadas = math.sqrt(self.n_rodadas)
         t_student = 1.96
 
+        # calculando o intervalo de confianca de cada metrica utilizando a t-student
         self.ic_x1 = t_student * self.dp_x1 / raiz_n_rodadas
         self.ic_w1 = t_student * self.dp_w1 / raiz_n_rodadas
         self.ic_nq1 = t_student * self.dp_nq1 / raiz_n_rodadas
@@ -382,24 +411,59 @@ class Metrica:
         self.ic_t2 = t_student * self.dp_t2 / raiz_n_rodadas
         self.ic_w2_med = t_student * self.dp_w2_med / raiz_n_rodadas
 
+        # calculando a precisao de cada metrica
+        self.precisao_x1 = round((self.ic_x1 / self.x1_med_total) * 100, 2)
+        self.precisao_w1 = round((self.ic_w1 / self.w1_med_total) * 100, 2)
+        self.precisao_nq1 = round((self.ic_nq1 / self.nq1_med_total) * 100, 2)
+        self.precisao_ns1 = round((self.ic_ns1 / self.ns1_med_total) * 100, 2)
+        self.precisao_n1 = round((self.ic_n1 / self.n1_med_total) * 100, 2)
+        self.precisao_t1 = round((self.ic_t1 / self.t1_med_total) * 100, 2)
+        self.precisao_w1_med = round((self.ic_w1_med / self.var_w1_med_total) * 100, 2)
+
+        self.precisao_x2 = round((self.ic_x2 / self.x2_med_total) * 100, 2)
+        self.precisao_w2 = round((self.ic_w2 / self.w2_med_total) * 100, 2)
+        self.precisao_nq2 = round((self.ic_nq2 / self.nq2_med_total) * 100, 2)
+        self.precisao_ns2 = round((self.ic_ns2 / self.ns2_med_total) * 100, 2)
+        self.precisao_n2 = round((self.ic_n2 / self.n2_med_total) * 100, 2)
+        self.precisao_t2 = round((self.ic_t2 / self.t2_med_total) * 100, 2)
+        self.precisao_w2_med = round((self.ic_w2_med / self.var_w2_med_total) * 100, 2)
+
+		# calculando o intervalo de confianca de V[W1] e V[W2] usando chi-squared
+		# eh usada como variancia a media da variancia de todas as rodadas, e n como numero de fregueses por rodada
+        alfa = 0.05
+
+        # calculando a inversa da cdf para os limites inferior e superior
+        self.chi2_inferior = chi2.ppf(1 - alfa/2, self.fregueses_por_rodada - 1)
+        self.chi2_superior  = chi2.ppf(alfa/2, self.fregueses_por_rodada - 1)
+
+        self.w1_chi2_inferior = (self.fregueses_por_rodada - 1) * self.var_w1_med_total / self.chi2_inferior
+        self.w1_chi2_superior = (self.fregueses_por_rodada - 1) * self.var_w1_med_total / self.chi2_superior
+
+        self.w2_chi2_inferior = (self.fregueses_por_rodada - 1) * self.var_w2_med_total / self.chi2_inferior
+        self.w2_chi2_superior = (self.fregueses_por_rodada - 1) * self.var_w2_med_total / self.chi2_superior
+
+        self.precisao_chi2 = round(((self.chi2_inferior - self.chi2_superior) / (self.chi2_inferior + self.chi2_superior)) * 100, 2)
+
         tabela = PrettyTable(["Metrica", "Intervalo_inferior", "Intervalo_superior", "precisao"])
 
-        tabela.add_row(["E[T1]", round((self.t1_med_total - self.ic_t1), 6), round((self.t1_med_total + self.ic_t1), 6), 0])
-        tabela.add_row(["E[W1]", round((self.w1_med_total - self.ic_w1), 6), round((self.w1_med_total + self.ic_w1), 6), 0])
-        tabela.add_row(["E[X1]", round((self.x1_med_total - self.ic_x1), 6), round((self.x1_med_total + self.ic_x1), 6), 0])
-        tabela.add_row(["E[N1]", round((self.n1_med_total - self.ic_n1), 6), round((self.n1_med_total + self.ic_n1), 6), 0])
-        tabela.add_row(["E[Nq1]", round((self.nq1_med_total - self.ic_nq1), 6), round((self.nq1_med_total + self.ic_nq1), 6), 0])
-        tabela.add_row(["E[Ns1]", round((self.ns1_med_total - self.ic_ns1), 6), round((self.ns1_med_total + self.ic_ns1), 6), 0])
+        tabela.add_row(["E[T1]", round((self.t1_med_total - self.ic_t1), 6), round((self.t1_med_total + self.ic_t1), 6), str(self.precisao_t1) + "%"])
+        tabela.add_row(["E[W1]", round((self.w1_med_total - self.ic_w1), 6), round((self.w1_med_total + self.ic_w1), 6), str(self.precisao_w1) + "%"])
+        tabela.add_row(["E[X1]", round((self.x1_med_total - self.ic_x1), 6), round((self.x1_med_total + self.ic_x1), 6), str(self.precisao_x1) + "%"])
+        tabela.add_row(["E[N1]", round((self.n1_med_total - self.ic_n1), 6), round((self.n1_med_total + self.ic_n1), 6), str(self.precisao_n1) + "%"])
+        tabela.add_row(["E[Nq1]", round((self.nq1_med_total - self.ic_nq1), 6), round((self.nq1_med_total + self.ic_nq1), 6), str(self.precisao_nq1) + "%"])
+        tabela.add_row(["E[Ns1]", round((self.ns1_med_total - self.ic_ns1), 6), round((self.ns1_med_total + self.ic_ns1), 6), str(self.precisao_ns1) + "%"])
 
-        tabela.add_row(["E[T2]", round((self.t2_med_total - self.ic_t2), 6), round((self.t2_med_total + self.ic_t2), 6), 0])
-        tabela.add_row(["E[W2]", round((self.w2_med_total - self.ic_w2), 6), round((self.w2_med_total + self.ic_w2), 6), 0])
-        tabela.add_row(["E[X2]", round((self.x2_med_total - self.ic_x2), 6), round((self.x2_med_total + self.ic_x2), 6), 0])
-        tabela.add_row(["E[N2]", round((self.n2_med_total - self.ic_n2), 6), round((self.n2_med_total + self.ic_n2), 6), 0])
-        tabela.add_row(["E[Nq2]", round((self.nq2_med_total - self.ic_nq2), 6), round((self.nq2_med_total + self.ic_nq2), 6), 0])
-        tabela.add_row(["E[Ns2]", round((self.ns2_med_total - self.ic_ns2), 6), round((self.ns2_med_total + self.ic_ns2), 6), 0])
+        tabela.add_row(["E[T2]", round((self.t2_med_total - self.ic_t2), 6), round((self.t2_med_total + self.ic_t2), 6), str(self.precisao_t2) + "%"])
+        tabela.add_row(["E[W2]", round((self.w2_med_total - self.ic_w2), 6), round((self.w2_med_total + self.ic_w2), 6), str(self.precisao_w2) + "%"])
+        tabela.add_row(["E[X2]", round((self.x2_med_total - self.ic_x2), 6), round((self.x2_med_total + self.ic_x2), 6), str(self.precisao_x2) + "%"])
+        tabela.add_row(["E[N2]", round((self.n2_med_total - self.ic_n2), 6), round((self.n2_med_total + self.ic_n2), 6), str(self.precisao_n2) + "%"])
+        tabela.add_row(["E[Nq2]", round((self.nq2_med_total - self.ic_nq2), 6), round((self.nq2_med_total + self.ic_nq2), 6), str(self.precisao_nq2) + "%"])
+        tabela.add_row(["E[Ns2]", round((self.ns2_med_total - self.ic_ns2), 6), round((self.ns2_med_total + self.ic_ns2), 6), str(self.precisao_ns2) + "%"])
 
-        tabela.add_row(["V[W1] t_student", round((self.var_w1_med_total - self.ic_w1_med), 6), round((self.var_w1_med_total + self.ic_w1_med), 6), 0])
-        tabela.add_row(["V[W2] t_student", round((self.var_w2_med_total - self.ic_w2_med), 6), round((self.var_w2_med_total + self.ic_w2_med), 6), 0])
+        tabela.add_row(["V[W1] t_student", round((self.var_w1_med_total - self.ic_w1_med), 6), round((self.var_w1_med_total + self.ic_w1_med), 6), str(self.precisao_w1_med) + "%"])
+        tabela.add_row(["V[W2] t_student", round((self.var_w2_med_total - self.ic_w2_med), 6), round((self.var_w2_med_total + self.ic_w2_med), 6), str(self.precisao_w2_med) + "%"])
+        
+        tabela.add_row(["V[W1] chi_square", round(self.w1_chi2_inferior, 6), round(self.w1_chi2_superior, 6), str(self.precisao_chi2) + "%"])
+        tabela.add_row(["V[W2] chi_square", round(self.w2_chi2_inferior, 6), round(self.w2_chi2_superior, 6), str(self.precisao_chi2) + "%"])
 
         print(tabela, "\n")
-
