@@ -7,12 +7,12 @@ class Fregues:
     """ Classe que representa os fregueses do sistema
     """
 
-    def __init__(self, fregues_id = -1, tempo_chegada = -1, taxa_servico = -1, cor = 0):
+    def __init__(self, fregues_id = -1, tempo_chegada = -1, taxa_servico = -1, cor = 0, xs1 = 0, xs2 = 0):
         self.fregues_id = fregues_id
         self.tempo_chegada1 = tempo_chegada
         self.tempo_chegada2 = 0
-        self.tempo_servico1 = Utils.gera_taxa_exp_seed(taxa_servico)
-        self.tempo_servico2 = Utils.gera_taxa_exp_seed(taxa_servico)
+        self.tempo_servico1 = xs1 or Utils.gera_taxa_exp_seed(taxa_servico)
+        self.tempo_servico2 = xs2 or Utils.gera_taxa_exp_seed(taxa_servico)
         self.tempo_restante = self.tempo_servico1
         self.prioridade = 1
         self.cor = cor

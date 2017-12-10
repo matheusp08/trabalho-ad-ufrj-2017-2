@@ -349,21 +349,22 @@ class Metrica:
             self.var_t2 += (self.t2_med_rodada[index] - self.t2_med_total) ** 2
             self.var_w2_med += (self.var_w2_med_rodada[index] - self.var_w2_med_total) ** 2
 
-        self.var_x1 /= (self.n_rodadas - 1)
-        self.var_w1 /= (self.n_rodadas - 1)
-        self.var_nq1 /= (self.n_rodadas - 1)
-        self.var_ns1 /= (self.n_rodadas - 1)
-        self.var_n1 /= (self.n_rodadas - 1)
-        self.var_t1 /= (self.n_rodadas - 1)
-        self.var_w1_med /= (self.n_rodadas - 1)
+        if self.n_rodadas > 1:
+            self.var_x1 /= (self.n_rodadas - 1)
+            self.var_w1 /= (self.n_rodadas - 1)
+            self.var_nq1 /= (self.n_rodadas - 1)
+            self.var_ns1 /= (self.n_rodadas - 1)
+            self.var_n1 /= (self.n_rodadas - 1)
+            self.var_t1 /= (self.n_rodadas - 1)
+            self.var_w1_med /= (self.n_rodadas - 1)
 
-        self.var_x2 /= (self.n_rodadas - 1)
-        self.var_w2 /= (self.n_rodadas - 1)
-        self.var_nq2 /= (self.n_rodadas - 1)
-        self.var_ns2 /= (self.n_rodadas - 1)
-        self.var_n2 /= (self.n_rodadas - 1)
-        self.var_t2 /= (self.n_rodadas - 1)
-        self.var_w2_med /= (self.n_rodadas - 1)
+            self.var_x2 /= (self.n_rodadas - 1)
+            self.var_w2 /= (self.n_rodadas - 1)
+            self.var_nq2 /= (self.n_rodadas - 1)
+            self.var_ns2 /= (self.n_rodadas - 1)
+            self.var_n2 /= (self.n_rodadas - 1)
+            self.var_t2 /= (self.n_rodadas - 1)
+            self.var_w2_med /= (self.n_rodadas - 1)
 
     def calcula_desvios_padrao(self):
         """ Funcao para calcular os desvios padroes das metricas analisadas

@@ -40,12 +40,26 @@ class Simulador:
         else:
             id_proximo_fregues = 0               # id do proximo fregues a ser criado 
         
-        # enquanto nao foram executadas n rodadas, conforme parametro de entrada, o programa permanece no loop abaixo
+        deterministico = 0               # Variável que vai servir de booleano para testar os casos deterministicos
+        xs1 = [0]      
+        xs2 = [0]
+        if deterministico:
+            chegadas = [1, 4]           # Vetor com o tempo de chegada de cada fregues   
+            xs1 = [1, 2]                # Vetor com o tempo de x1s de cada fregues
+            xs2 = [5, 2]                # Vetor com o tempo de x2s de cada fregues         
+        
+        # O programa permanecera no loop enquanto nao forem executadas as n rodadas
         while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:
-            # eh gerado o tempo ate a chegada de um proximo fregues usando a taxa de chegada lambd
-            tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)
-            # e com isso, o tempo do sistema eh somado do tempo que o proximo fregues chegara
-            tempo += tempo_ate_prox_chegada
+            
+            if deterministico:
+                if len(chegadas) > 0:
+                    tempo_ate_prox_chegada = chegadas.pop(0) - tempo       # Tempo de chegada conforme sistema deterministico
+                else:
+                    tempo_ate_prox_chegada = 10                            # Tempo coringa (grande) para caso nao haja mais chegadas
+            else:
+                tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)   # Geracao de tempo de chegada com taxa lambd
+
+            tempo += tempo_ate_prox_chegada    # Tempo do sistema somado do tempo que o prox fregues chegara
 
             # se ainda tiver tempo livre ate a proxima chegada e algum fregues tiver executando, tratamos a sua execucao
             while tempo_ate_prox_chegada > 0 and fregues_executando is not None:
@@ -100,7 +114,10 @@ class Simulador:
             # agora tratamos a chegada de um novo fregues, criando um novo objeto Fregues, adicionando-o na fila 1, lancando um
             # evento de chegada 1 e atualizando as metricas X1, X2, T1, T2, Nq1, Nq2, N1 e N2
             
-            fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual)
+            fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual, xs1[0], xs2[0])
+            if deterministico:
+                del xs1[0]          # Ja foi alocado o Xs1 do proximo fregues (do caso deterministico)
+                del xs2[0]          # Ja foi alocado o Xs2 do proximo fregues (do caso deterministico)
             
             metricas.acumula_x1(fregues.tempo_servico1, rodada_atual)
             metricas.acumula_t1(fregues.tempo_servico1, rodada_atual)
