@@ -7,40 +7,58 @@ from fila import Fila
 class Plot:
     """ Classe Plot
     """
-    figuras = 6
+    def __init__(self):
+        self.w1_acumulado = 0
+        self.nq1_acumulado = 0
+        self.ns1_acumulado = 0
+        self.w2_acumulado = 0
+        self.nq2_acumulado = 0
+        self.ns2_acumulado = 0
 
-    def __init__(self, n_rodadas, fregueses_por_rodada, n_transiente, pontos):
-        self.ns1 = []
-        self.nq1 = []
         self.w1 = []
-        self.ns2 = []
-        self.nq2 = []
+        self.nq1 = []
+        self.ns1 = []
         self.w2 = []
-        self.fregueses_por_rodada = fregueses_por_rodada
-        self.n_rodadas = n_rodadas
-        self.n_transiente = n_transiente
-        self.intervalo = (fregueses_por_rodada + n_transiente) / pontos
+        self.nq2 = []
+        self.ns2 = []
 
-    def desenha(self, tamanho):
+    def desenha(self, intervalo):
         """ Funcao para desenhar as metricas
         """
-        plt.figure(1)
-        plt.plot(self.ns1)
-        plt.figure(2)
-        plt.plot(self.ns2)
-        plt.show()
+        plt.figure("E[W1] x Numero de fregueses")
+        plt.plot(self.w1)
+        plt.xticks(np.arange(0, len(self.w1) + 1, intervalo))
+        plt.ylabel("Media do tamanho da fila 1")
+        plt.xlabel("Numero de fregueses na fila 1")
 
-    def desenha_grafico(self, dados, x_label, y_label):
-        """ Funcao para desenhar os graficos
-            Args:
-                dados: vetor com os valores a serem plotados
-                xLabel: texto do eixo x
-                yLabel: texto do eixo y
-        """
-        tamanho = len(dados)
-        fator = self.fregueses_por_rodada * self.n_rodadas * 0.01
-        plt.plot(dados)
-        plt.xticks(np.arange(0, tamanho + 1, fator))
-        plt.ylabel(y_label)
-        plt.xlabel(x_label)
+        plt.figure("E[W2] x Numero de fregueses")
+        plt.plot(self.w2)
+        plt.xticks((np.arange(0, len(self.w2) + 1, intervalo)))
+        plt.ylabel("Media do tamanho da fila 2")
+        plt.xlabel("Numero de fregueses na fila 2")
+
+        plt.figure("E[Nq1] x Numero de fregueses")
+        plt.plot(self.nq1)
+        plt.xticks(np.arange(0, len(self.nq1) + 1, intervalo))
+        plt.ylabel("Media do tamanho da fila 1")
+        plt.xlabel("Numero de fregueses na fila 1")
+
+        plt.figure("E[Nq2] x Numero de fregueses")
+        plt.plot(self.nq2)
+        plt.xticks((np.arange(0, len(self.nq2) + 1, intervalo)))
+        plt.ylabel("Media do tamanho da fila 2")
+        plt.xlabel("Numero de fregueses na fila 2")
+
+        plt.figure("E[Ns1] x Numero de fregueses")
+        plt.plot(self.ns1)
+        plt.xticks((np.arange(0, len(self.ns1) + 1, intervalo)))
+        plt.ylabel("Media do tamanho da fila 2")
+        plt.xlabel("Numero de fregueses na fila 2")
+
+        plt.figure("E[Ns2] x Numero de fregueses")
+        plt.plot(self.ns2)
+        plt.xticks((np.arange(0, len(self.ns2) + 1, intervalo)))
+        plt.ylabel("Media do tamanho da fila 2")
+        plt.xlabel("Numero de fregueses na fila 2")
+
         plt.show()

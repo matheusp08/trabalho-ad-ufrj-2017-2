@@ -7,6 +7,7 @@ from fregues import Fregues
 from utils import Utils
 from evento import Evento, TipoEvento
 from metrica import Metrica
+from plot import Plot
 from prettytable import PrettyTable
 
 class Simulador:
@@ -27,10 +28,13 @@ class Simulador:
         eventos = []                    # lista de eventos.
 
         total_fregueses_servidos = 0    # total de fregueses que passaram pelo sistema.
+        total_fregueses_criados = 0     # total de fregueses criados pelo sistema
         tempo = 0                       # tempo atual da simulacao.
         rodada_atual = 0                # rodada da fase transiente.
         fregues_executando = None       # inicializacao nula do fregues executando.
 
+        plot = Plot()
+        intervalo = (n_transiente + (fregueses_por_rodada * n_rodadas)) * 0.1
         metricas = Metrica(n_rodadas, fregueses_por_rodada) 
         if n_transiente > 0:
             id_proximo_fregues = - n_transiente
@@ -52,6 +56,7 @@ class Simulador:
             
 
         ''' Execucao da SIMULACAO '''
+        inicio = datetime.now()
         while total_fregueses_servidos < n_rodadas * fregueses_por_rodada:  # Loop de execucao sobre as RODADAS.
             
             # Tempo de chegada conforme sistema Deterministico:
@@ -83,6 +88,7 @@ class Simulador:
                         w1 = tempo_atual - fregues_executando.tempo_chegada1 - fregues_executando.tempo_servico1
                         if cor <= n_rodadas: # so calcula metricas dos fregueses ate n_rodadas
                             metricas.acumula_w1(w1, cor)
+                            plot.w1_acumulado += w1
                             metricas.acumula_t1(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
@@ -91,6 +97,7 @@ class Simulador:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
                         if cor <= n_rodadas: # so calcula metricas dos fregueses ate n_rodadas
                             metricas.acumula_w2(w2, cor)
+                            plot.w2_acumulado += w2
                             metricas.acumula_t2(w2, cor)
                         # if para garantir que os fregueses das rodadas foram os servidos
                         if fregues_executando.cor > 0 and fregues_executando.cor <= n_rodadas:
@@ -131,6 +138,8 @@ class Simulador:
                 metricas.acumula_t2(fregues.tempo_servico2, rodada_atual)
                 metricas.acumula_nq2(fila2.tamanho(), rodada_atual)
                 metricas.acumula_n2(fila2.tamanho(), rodada_atual)
+                plot.nq1_acumulado += fila1.tamanho()
+                plot.nq2_acumulado += fila2.tamanho()
 
             eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
@@ -143,13 +152,24 @@ class Simulador:
                     fregues_executando = fregues
                     if rodada_atual <= n_rodadas:
                         metricas.acumula_ns2(1, rodada_atual)
+                        plot.ns2_acumulado += 1
                         metricas.acumula_n2(1, rodada_atual)
                 else:                                           # Novo fregues para fila 1.
                     fila1.adiciona(fregues)
                     if rodada_atual <= n_rodadas:
                         metricas.acumula_ns1(1, rodada_atual)
+                        plot.ns1_acumulado += 1
                         metricas.acumula_n1(1, rodada_atual)
             id_proximo_fregues += 1
+            total_fregueses_criados += 1
+
+            # if id_proximo_fregues % intervalo == 0:
+            plot.w1.append(plot.w1_acumulado / total_fregueses_criados)
+            plot.nq1.append(plot.nq1_acumulado / total_fregueses_criados)
+            plot.ns1.append(plot.ns1_acumulado / total_fregueses_criados)
+            plot.w2.append(plot.w2_acumulado / total_fregueses_criados)
+            plot.nq2.append(plot.nq2_acumulado / total_fregueses_criados)
+            plot.ns2.append(plot.ns2_acumulado / total_fregueses_criados)
 
         # Imprecao dos parametros de entrada.
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
@@ -158,6 +178,13 @@ class Simulador:
 
         # Calculo e imprecao das metricas.
         metricas.calcula(deterministico)
+
+        fim = datetime.now()
+        total = fim - inicio
+        print("Tempo de execucao: " + str(total))
+
+        # plota os graficos
+        plot.desenha(intervalo)
 
 def main(argv):
     """ Funcao main
@@ -170,13 +197,8 @@ def main(argv):
     fregueses_por_rodada = int(argv[2])
     n_transiente = int(argv[3])
     rho = float(argv[4])
-    inicio = datetime.now()
 
     Simulador().executar(n_rodadas, fregueses_por_rodada, rho, n_transiente)
-
-    fim = datetime.now()
-    total = fim - inicio
-    print("Tempo de execucao: " + str(total))
 
 if __name__ == "__main__":
     main(sys.argv)
