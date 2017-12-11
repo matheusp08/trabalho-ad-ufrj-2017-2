@@ -9,10 +9,10 @@ class Utils:
     """
 
     # semente para o programa sempre gerar os mesmo numeros aleatorios
-    nprand.seed(51)
+    # nprand.seed(51)
 
     @staticmethod
-    def gera_taxa_exp_seed(taxa):
+    def gera_taxa_exp(taxa):
         """ Funcao para retornar um numero aleatorio que segue uma taxa exponencial
             com base na taxa de entrada e na semente
             Args:
@@ -21,14 +21,3 @@ class Utils:
                 numero aleatorio seguindo uma taxa exponencial 
         """
         return -1*math.log(1 - nprand.rand(1)[0]) / taxa
-
-    @staticmethod
-    def gera_taxa_exp(taxa):
-        """ Funcao para retornar um numero aleatorio que segue uma taxa exponencial
-            com base na taxa de entrada
-            Args:
-                taxa: valor da taxa
-            Returns:
-                numero aleatorio seguindo uma taxa exponencial 
-        """
-        return nprand.exponential(taxa)

@@ -67,7 +67,7 @@ class Simulador:
                     tempo_ate_prox_chegada = 10
             # Tempo de chegada conforme sistema Exponencial:
             else:
-                tempo_ate_prox_chegada = Utils.gera_taxa_exp_seed(lambd)  
+                tempo_ate_prox_chegada = Utils.gera_taxa_exp(lambd)  
             tempo += tempo_ate_prox_chegada
 
 
@@ -171,12 +171,12 @@ class Simulador:
             plot.nq2.append(plot.nq2_acumulado / total_fregueses_criados)
             plot.ns2.append(plot.ns2_acumulado / total_fregueses_criados)
 
-        # Imprecao dos parametros de entrada.
+        # Impressao dos parametros de entrada.
         tabela_parametros = PrettyTable(["n_rodadas", "fregueses/rodada", "fase_transiente", "rho", "lambda"])
         tabela_parametros.add_row([n_rodadas, fregueses_por_rodada, n_transiente, rho, lambd])
         print(tabela_parametros, "\n")
 
-        # Calculo e imprecao das metricas.
+        # Calculo e impressao das metricas.
         metricas.calcula(deterministico)
 
         fim = datetime.now()
@@ -184,7 +184,7 @@ class Simulador:
         print("Tempo de execucao: " + str(total))
 
         # plota os graficos
-        plot.desenha(intervalo)
+        plot.desenha(intervalo, n_rodadas, fregueses_por_rodada, n_transiente, rho)
 
 def main(argv):
     """ Funcao main
