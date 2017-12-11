@@ -5,7 +5,7 @@ from datetime import datetime
 from fila import Fila
 from fregues import Fregues
 from utils import Utils
-from evento import Evento, TipoEvento
+# from evento import Evento, TipoEvento
 from metrica import Metrica
 from plot import Plot
 from prettytable import PrettyTable
@@ -25,7 +25,7 @@ class Simulador:
         
         fila1 = Fila(1)                 # fila 1, mais prioritaria (chegadas exogenas).
         fila2 = Fila(2)                 # fila 2, menos prioritaria (nao ha chagadas exogenas).
-        eventos = []                    # lista de eventos.
+        # eventos = []                    # lista de eventos.
 
         total_fregueses_servidos = 0    # total de fregueses que passaram pelo sistema.
         total_fregueses_criados = 0     # total de fregueses criados pelo sistema
@@ -80,7 +80,7 @@ class Simulador:
                     fregues_executando.tempo_restante = 0
                     tempo_atual = tempo - tempo_ate_prox_chegada
                     cor = fregues_executando.cor
-                    eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.FIM_SERVICO, fregues_executando.prioridade))
+                    # eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.FIM_SERVICO, fregues_executando.prioridade))
                     
                     # Atualizacao de metricas de acordo com a fila do fregues (1 ou 2).
                     # E realizacao da troca de filas (para o fregues que executou em 1) ou evento de fim de execucao (fregues dafila 2)
@@ -92,7 +92,7 @@ class Simulador:
                             metricas.acumula_t1(w1, cor)
                         fregues_executando.troca_fila(tempo_atual)
                         fila2.adiciona(fregues_executando)
-                        eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
+                        # eventos.append(Evento(tempo_atual, fregues_executando.fregues_id, TipoEvento.CHEGADA, 2))
                     else:
                         w2 = tempo_atual - fregues_executando.tempo_chegada2 - fregues_executando.tempo_servico2
                         if cor <= n_rodadas: # so calcula metricas dos fregueses ate n_rodadas
@@ -141,7 +141,7 @@ class Simulador:
                 plot.nq1_acumulado += fila1.tamanho()
                 plot.nq2_acumulado += fila2.tamanho()
 
-            eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
+            # eventos.append(Evento(tempo, id_proximo_fregues, TipoEvento.CHEGADA, 1))
 
             # Rotina de verificacao de quem deve executar.
             if fregues_executando is None:
