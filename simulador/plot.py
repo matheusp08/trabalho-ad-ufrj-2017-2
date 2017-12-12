@@ -77,6 +77,6 @@ class Plot:
         plt.xlabel(labelx)
 
         figure = plt.gcf()
-        figure.set_size_inches(18, 16)
+        figure.set_size_inches(26, 18)
         plt.savefig("graficos/" + params + ".png", dpi=500)
         plt.show()
