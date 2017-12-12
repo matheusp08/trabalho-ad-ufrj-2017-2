@@ -122,6 +122,8 @@ class Simulador:
             if id_proximo_fregues >= 0 and id_proximo_fregues % fregueses_por_rodada == 0:
                 rodada_atual += 1
 
+            if deterministico and total_fregueses_servidos == fregueses_por_rodada:
+                break
             # Chega um novo fregues: entra na fila 1.
             fregues = Fregues(id_proximo_fregues, tempo, taxa_servico, rodada_atual, xs1[0], xs2[0])
             if deterministico:
