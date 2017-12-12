@@ -32,7 +32,7 @@ class Plot:
         plt.figure(params)
         
         titulo = str(n_rodadas) + " rodadas; " + str(n_fregueses) +" fregueses; Fase transiente: "+ str(n_transiente) +"; rho = " + str(rho)
-        plt.suptitle(titulo, fontsize=18)
+        plt.suptitle(titulo, fontsize=28)
         
         # plt.figure("E[W1] x " + labelx + params)
         plt.subplot(321)
@@ -79,4 +79,4 @@ class Plot:
         figure = plt.gcf()
         figure.set_size_inches(26, 18)
         plt.savefig("graficos/" + params + ".png", dpi=200)
-        plt.show()
+        # plt.show()
