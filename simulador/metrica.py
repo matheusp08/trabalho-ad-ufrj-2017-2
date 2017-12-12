@@ -220,20 +220,21 @@ class Metrica:
         """
         # criando header da tabela
         tabela = PrettyTable(["Rodadas",
-                              "E[T1]",
-                              "E[W1]",
-                              "E[X1]",
-                              "E[N1]",
-                              "E[Nq1]",
-                              "E[Ns1]",
-                              "E[T2]",
-                              "E[W2]",
-                              "E[X2]",
-                              "E[N2]",
-                              "E[Nq2]",
-                              "E[Ns2]",
-                              "Var[W1]",
-                              "Var[W2]"])
+                             "E[T1]",
+                             "E[W1]",
+                             "E[X1]",
+                             "E[N1]",
+                             "E[Nq1]",
+                             "E[Ns1]",
+                             "E[T2]",
+                             "E[W2]",
+                             "E[X2]",
+                             "E[N2]",
+                             "E[Nq2]",
+                             "E[Ns2]",
+                             "Var[W1]",
+                             "Var[W2]"])
+                            
 
         for index in range(1, self.n_rodadas+1):
             # calculando a esperanca das metricas da fila 1
@@ -333,7 +334,8 @@ class Metrica:
                         round(self.nq2_med_total, 6),
                         round(self.ns2_med_total, 6),
                         round(self.var_w1_med_total, 6),
-                        round(self.var_w2_med_total, 6)])
+                        round(self.var_w2_med_total, 6)
+                        ])
 
         print(tabela, "\n")
 
@@ -443,18 +445,18 @@ class Metrica:
             self.precisao_w2_med = 0 if self.var_w2_med_total == 0 else round((self.ic_w2_med / self.var_w2_med_total) * 100, 2)
 
             # calculando o intervalo de confianca de V[W1] e V[W2] usando chi-squared
-            # eh usada como variancia a media da variancia de todas as rodadas, e n como numero de fregueses por rodada
+            # eh usada como variancia a media da variancia de todas as rodadas, e n como numero de rodadas
             alfa = 0.05
 
             # calculando a inversa da cdf para os limites inferior e superior
-            self.chi2_inferior = chi2.ppf(1 - alfa/2, self.fregueses_por_rodada - 1)
-            self.chi2_superior  = chi2.ppf(alfa/2, self.fregueses_por_rodada - 1)
+            self.chi2_inferior = chi2.ppf(1 - alfa/2, self.n_rodadas - 1)
+            self.chi2_superior  = chi2.ppf(alfa/2, self.n_rodadas - 1)
 
-            self.w1_chi2_inferior = (self.fregueses_por_rodada - 1) * self.var_w1_med_total / self.chi2_inferior
-            self.w1_chi2_superior = (self.fregueses_por_rodada - 1) * self.var_w1_med_total / self.chi2_superior
+            self.w1_chi2_inferior = (self.n_rodadas - 1) * self.var_w1_med_total / self.chi2_inferior
+            self.w1_chi2_superior = (self.n_rodadas - 1) * self.var_w1_med_total / self.chi2_superior
 
-            self.w2_chi2_inferior = (self.fregueses_por_rodada - 1) * self.var_w2_med_total / self.chi2_inferior
-            self.w2_chi2_superior = (self.fregueses_por_rodada - 1) * self.var_w2_med_total / self.chi2_superior
+            self.w2_chi2_inferior = (self.n_rodadas - 1) * self.var_w2_med_total / self.chi2_inferior
+            self.w2_chi2_superior = (self.n_rodadas - 1) * self.var_w2_med_total / self.chi2_superior
 
             self.precisao_chi2 = round(((self.chi2_inferior - self.chi2_superior) / (self.chi2_inferior + self.chi2_superior)) * 100, 2)
 

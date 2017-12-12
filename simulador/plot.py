@@ -78,5 +78,5 @@ class Plot:
 
         figure = plt.gcf()
         figure.set_size_inches(26, 18)
-        plt.savefig("graficos/" + params + ".png", dpi=500)
+        plt.savefig("graficos/" + params + ".png", dpi=200)
         plt.show()
