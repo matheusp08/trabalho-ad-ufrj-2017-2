@@ -280,7 +280,7 @@ class Metrica:
                             round(self.ns1_med_rodada[index], 6),
                             round(self.t2_med_rodada[index], 6),
                             round(self.w2_med_rodada[index], 6),
-                            round(self.w2_med_rodada[index], 6),
+                            round(self.x2_med_rodada[index], 6),
                             round(self.n2_med_rodada[index], 6),
                             round(self.nq2_med_rodada[index], 6),
                             round(self.ns2_med_rodada[index], 6),

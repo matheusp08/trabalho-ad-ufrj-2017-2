@@ -119,7 +119,7 @@ class Simulador:
 
 
             # Tratando as rodadas.
-            if id_proximo_fregues % fregueses_por_rodada == 0:
+            if id_proximo_fregues >= 0 and id_proximo_fregues % fregueses_por_rodada == 0:
                 rodada_atual += 1
 
             # Chega um novo fregues: entra na fila 1.
